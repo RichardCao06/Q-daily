@@ -1,0 +1,254 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgb(255 216 66 / 18%), transparent 22%),
+    linear-gradient(180deg, #f3f0e8 0%, #ece7dc 100%);
+  color: var(--ink-strong);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(0 0 0 / 0.95);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 72px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+}
+
+.logoMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--brand-yellow);
+  color: #000;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.logoText {
+  display: grid;
+  gap: 2px;
+}
+
+.logoText strong {
+  font-size: 0.95rem;
+}
+
+.logoText span {
+  color: var(--ink-muted-on-dark);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  gap: 18px;
+}
+
+.nav a {
+  color: rgb(255 255 255 / 0.82);
+  font-size: 0.92rem;
+}
+
+.nav a:hover {
+  color: var(--brand-yellow);
+}
+
+.main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 72px;
+}
+
+.hero {
+  display: grid;
+  gap: 24px;
+  padding: 36px;
+  background:
+    linear-gradient(0deg, rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.2)),
+    var(--article-gradient);
+  color: #fff;
+  box-shadow: 0 24px 48px rgb(11 12 13 / 0.08);
+}
+
+.heroCategory {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  background: #000;
+  color: var(--brand-yellow);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  max-width: 900px;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 4vw, 4.3rem);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+}
+
+.heroExcerpt {
+  max-width: 760px;
+  color: rgb(255 255 255 / 0.84);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: rgb(255 255 255 / 0.74);
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 0.9fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.body {
+  padding: 36px;
+  background: rgb(255 255 255 / 0.82);
+  box-shadow: 0 20px 40px rgb(11 12 13 / 0.05);
+}
+
+.body p {
+  margin-top: 20px;
+  font-size: 1.06rem;
+  line-height: 1.95;
+}
+
+.body p:first-child {
+  margin-top: 0;
+}
+
+.sidebar {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.sidebarCard {
+  padding: 22px;
+  background: #111;
+  color: #fff;
+}
+
+.sidebarCard h2 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.sidebarCard p {
+  color: rgb(255 255 255 / 0.7);
+  line-height: 1.7;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.tagList a {
+  display: inline-flex;
+  padding: 8px 10px;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--brand-yellow);
+  font-size: 0.82rem;
+}
+
+.relatedSection {
+  margin-top: 36px;
+}
+
+.relatedHeading {
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.relatedCard {
+  display: grid;
+  background: #fff;
+  box-shadow: 0 18px 40px rgb(11 12 13 / 0.06);
+}
+
+.relatedVisual {
+  min-height: 170px;
+  background:
+    linear-gradient(0deg, rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.16)),
+    var(--card-gradient);
+}
+
+.relatedBody {
+  padding: 18px;
+}
+
+.relatedBody span {
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.relatedBody h3 {
+  margin-top: 10px;
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 900px) {
+  .contentGrid,
+  .relatedGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero,
+  .body {
+    padding: 24px;
+  }
+
+  .headerInner {
+    flex-direction: column;
+    align-items: start;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+}

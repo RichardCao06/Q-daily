@@ -1,0 +1,75 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgb(255 216 66 / 16%), transparent 20%),
+    linear-gradient(180deg, #f4f0e8 0%, #ece6da 100%);
+  color: var(--ink-strong);
+}
+
+.main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 72px 24px;
+}
+
+.hero {
+  display: grid;
+  gap: 14px;
+  padding: 32px;
+  background: #111;
+  color: #fff;
+}
+
+.eyebrow {
+  color: var(--brand-yellow);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.3rem);
+}
+
+.hero p {
+  max-width: 720px;
+  color: rgb(255 255 255 / 0.76);
+  line-height: 1.75;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.actions a {
+  display: inline-flex;
+  padding: 10px 14px;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--brand-yellow);
+}
+
+.sections {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.section {
+  padding: 24px;
+  background: rgb(255 255 255 / 0.84);
+  box-shadow: 0 18px 40px rgb(11 12 13 / 0.05);
+}
+
+.section h2 {
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.section p {
+  line-height: 1.8;
+}
