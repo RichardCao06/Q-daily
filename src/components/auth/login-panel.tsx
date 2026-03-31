@@ -21,11 +21,12 @@ export function LoginPanel() {
       return;
     }
 
+    const browserClient = supabase;
     setError(null);
     setMessage(null);
 
     startTransition(async () => {
-      const { error: signInError } = await supabase.auth.signInWithOtp({
+      const { error: signInError } = await browserClient.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: true,

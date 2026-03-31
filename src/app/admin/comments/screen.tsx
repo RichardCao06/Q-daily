@@ -64,9 +64,11 @@ export function AdminCommentsScreen() {
         return;
       }
 
+      const browserClient = supabase;
+
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await browserClient.auth.getSession();
 
       if (!session?.access_token) {
         return;

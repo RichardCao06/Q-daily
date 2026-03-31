@@ -18,6 +18,7 @@ import {
   type SpotlightStory,
   type Story,
 } from "./qdaily-data";
+import { isPublishedStatus } from "./article-management";
 import type { Database } from "./supabase/database.types";
 import { getSupabaseServerClient } from "./supabase/server";
 
@@ -160,7 +161,8 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
         supabase.from("tags").select("slug,name,description"),
         supabase
           .from("articles")
-          .select("slug,legacy_id,title,excerpt,published_at,comments_count,likes_count,palette,author_slug,reading_time,cover_alt,category_slug"),
+          .select("slug,legacy_id,title,excerpt,published_at,comments_count,likes_count,palette,author_slug,reading_time,cover_alt,category_slug,status")
+          .eq("status", "published"),
         supabase.from("article_blocks").select("article_slug,position,kind,content").order("position", { ascending: true }),
         supabase.from("article_tags").select("article_slug,tag_slug"),
         supabase
@@ -218,6 +220,7 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
     }
 
     const siteArticles: Article[] = articleRows
+      .filter((article) => isPublishedStatus(article.status))
       .map((article) => {
         const category = categoriesBySlug.get(article.category_slug);
         if (!category) {
@@ -233,7 +236,7 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
           slug: article.slug,
           title: article.title,
           excerpt: article.excerpt,
-          publishedAt: formatPublishedAt(article.published_at),
+          publishedAt: formatPublishedAt(article.published_at ?? new Date().toISOString()),
           comments: article.comments_count,
           likes: article.likes_count,
           palette: article.palette,

@@ -114,10 +114,12 @@ export type Database = {
           legacy_id: string | null;
           likes_count: number;
           palette: string;
-          published_at: string;
+          published_at: string | null;
           reading_time: string;
           slug: string;
+          status: "draft" | "published";
           title: string;
+          updated_by: string | null;
           updated_at?: string;
         };
         Insert: {
@@ -129,10 +131,12 @@ export type Database = {
           legacy_id?: string | null;
           likes_count?: number;
           palette: string;
-          published_at: string;
+          published_at?: string | null;
           reading_time: string;
           slug: string;
+          status?: "draft" | "published";
           title: string;
+          updated_by?: string | null;
         };
         Update: {
           author_slug?: string;
@@ -143,10 +147,12 @@ export type Database = {
           legacy_id?: string | null;
           likes_count?: number;
           palette?: string;
-          published_at?: string;
+          published_at?: string | null;
           reading_time?: string;
           slug?: string;
+          status?: "draft" | "published";
           title?: string;
+          updated_by?: string | null;
         };
         Relationships: [];
       };

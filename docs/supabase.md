@@ -29,6 +29,15 @@
 - `public_article_engagement` 与 `public_article_comments` 视图给前台互动读取提供稳定入口。
 - `admin_article_engagement` 与 `admin_user_overview` 为后续后台页面准备聚合数据。
 
+## Article management additions
+
+- `articles.status` 区分 `draft` 和 `published`，让后台可以先保存草稿再决定是否上线。
+- `articles.published_at` 允许为空，未发布文章不会被前台文章页、分类页、标签页和搜索页读取到。
+- `articles.updated_by` 记录最近一次编辑该文章的管理员。
+- `article_blocks` 继续作为正文段落存储层，编辑器以“多段落文本”方式回写这一张表。
+- `article_tags` 继续负责文章与标签的关系，编辑器保存时会整批重写当前文章的标签集合。
+- `articles` / `article_blocks` / `article_tags` 的 RLS 现在只对公众暴露已发布内容，管理员才有完整管理权限。
+
 ## Integration contract
 
 - 页面默认优先读取 Supabase。
@@ -40,6 +49,7 @@
 1. 在 Supabase 新项目里依次执行：
    - `supabase/migrations/202603310001_initial_schema.sql`
    - `supabase/migrations/202603310002_reader_launch.sql`
+   - `supabase/migrations/202603310003_article_management.sql`
 2. 执行 `supabase/seed.sql`
 3. 配置环境变量：
    - `NEXT_PUBLIC_SUPABASE_URL`

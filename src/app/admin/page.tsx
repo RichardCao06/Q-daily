@@ -19,9 +19,10 @@ export default function AdminIndexPage() {
           <p style={{ color: "var(--brand-yellow)", fontSize: "0.75rem", letterSpacing: "0.18em", textTransform: "uppercase" }}>Admin</p>
           <h1 style={{ marginTop: "14px", fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 4vw, 3.2rem)" }}>后台工作台</h1>
           <p style={{ marginTop: "14px", color: "var(--ink-muted)", lineHeight: 1.75 }}>
-            当前已提供评论审核、用户概览和文章互动统计，适合作为 Q-daily 正式上线第一版的轻量运营后台。
+            当前后台已经覆盖评论审核、用户概览、文章互动统计，以及轻量文章管理与发布工作流。
           </p>
           <div style={{ display: "flex", gap: "12px", marginTop: "18px", flexWrap: "wrap" }}>
+            <Link href="/admin/articles">进入文章管理台</Link>
             <Link href="/admin/comments">进入评论审核台</Link>
           </div>
         </section>

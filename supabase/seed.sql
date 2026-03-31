@@ -29,6 +29,7 @@ insert into public.articles (
   legacy_id,
   title,
   excerpt,
+  status,
   published_at,
   comments_count,
   likes_count,
@@ -39,18 +40,19 @@ insert into public.articles (
   category_slug
 )
 values
-  ('rebuild-a-newsroom-wall', 'story-1', '把首页当成品牌封面来设计，而不是普通的信息列表。', '醒目的分类角标、密集标题和强对比色块，是这个版本 QDaily 最鲜明的记忆点。', '2026-03-30T10:24:00+08:00', 20, 56, 'linear-gradient(135deg, #d16a3b 0%, #3d231a 100%)', 'richard-cao', '8 分钟', '黄黑色块与编辑墙拼贴', 'business'),
-  ('editorial-rhythm-and-density', 'story-2', '头部导航像新闻纸页眉，首屏混排像编辑在版面上排兵布阵。', '这次复刻会优先保留这种编辑感，而不是追求一个现代模板式首页。', '2026-03-30T11:08:00+08:00', 12, 34, 'linear-gradient(135deg, #29353f 0%, #10161a 100%)', 'richard-cao', '6 分钟', '暗色纸张与标题条块', 'culture'),
-  ('micro-differences-between-cards', 'story-3', '每张卡片都需要自己的节奏，统一里要有细小而明确的差别。', '卡片的图片区、角标、标题行长和底部统计共同决定阅读速度。', '2026-03-30T11:39:00+08:00', 9, 28, 'linear-gradient(135deg, #efc13c 0%, #5a4512 100%)', 'richard-cao', '5 分钟', '亮黄卡片与黑色边条', 'design'),
-  ('density-fits-qdaily', 'story-4', '不是所有新闻站都适合这种密度，但 QDaily 的气质恰好需要它。', '在秩序清晰的前提下，越密越能形成一种被编辑过的饱满感。', '2026-03-30T12:15:00+08:00', 14, 43, 'linear-gradient(135deg, #1b2e36 0%, #385d63 100%)', 'richard-cao', '7 分钟', '蓝灰色信息墙', 'smart'),
-  ('yellow-and-black-brand-skeleton', 'story-5', '黄与黑不是点缀，而是整个界面的品牌骨架。', '按钮、分隔线、数据卡和 hover 状态都围绕这组颜色建立辨识度。', '2026-03-30T12:48:00+08:00', 8, 31, 'linear-gradient(135deg, #f3d967 0%, #6c4a06 100%)', 'richard-cao', '4 分钟', '高对比黄黑视觉', 'fashion'),
-  ('next-card-should-also-be-worth-reading', 'story-6', '好的杂志式首页会让用户觉得下一张卡片也值得看。', '信息瀑布必须有节奏变化，否则它只会变成长长的疲劳滚动。', '2026-03-30T13:10:00+08:00', 17, 37, 'linear-gradient(135deg, #512f45 0%, #181017 100%)', 'richard-cao', '5 分钟', '暗色娱乐版面', 'entertainment'),
-  ('feature-cards-need-clear-boundaries', 'story-7', '专题卡和常规文章卡的边界要明显，这样首屏才会像一份刊物。', '专题使用更厚重的视觉和更长的文字区，常规卡片则更利落、重复、清晰。', '2026-03-30T13:40:00+08:00', 7, 24, 'linear-gradient(135deg, #7f7a55 0%, #262212 100%)', 'richard-cao', '6 分钟', '专题卡与杂志跨页', 'culture'),
-  ('cms-ready-editorial-system', 'story-8', '如果后续接 CMS，这套首页只需要换数据源，不需要推倒重来。', '组件拆分会围绕栏目、专题、文章和编辑推荐这些稳定内容模型来做。', '2026-03-30T14:05:00+08:00', 11, 29, 'linear-gradient(135deg, #8b431f 0%, #21130d 100%)', 'richard-cao', '6 分钟', '编辑系统与内容模型', 'business')
+  ('rebuild-a-newsroom-wall', 'story-1', '把首页当成品牌封面来设计，而不是普通的信息列表。', '醒目的分类角标、密集标题和强对比色块，是这个版本 QDaily 最鲜明的记忆点。', 'published', '2026-03-30T10:24:00+08:00', 20, 56, 'linear-gradient(135deg, #d16a3b 0%, #3d231a 100%)', 'richard-cao', '8 分钟', '黄黑色块与编辑墙拼贴', 'business'),
+  ('editorial-rhythm-and-density', 'story-2', '头部导航像新闻纸页眉，首屏混排像编辑在版面上排兵布阵。', '这次复刻会优先保留这种编辑感，而不是追求一个现代模板式首页。', 'published', '2026-03-30T11:08:00+08:00', 12, 34, 'linear-gradient(135deg, #29353f 0%, #10161a 100%)', 'richard-cao', '6 分钟', '暗色纸张与标题条块', 'culture'),
+  ('micro-differences-between-cards', 'story-3', '每张卡片都需要自己的节奏，统一里要有细小而明确的差别。', '卡片的图片区、角标、标题行长和底部统计共同决定阅读速度。', 'published', '2026-03-30T11:39:00+08:00', 9, 28, 'linear-gradient(135deg, #efc13c 0%, #5a4512 100%)', 'richard-cao', '5 分钟', '亮黄卡片与黑色边条', 'design'),
+  ('density-fits-qdaily', 'story-4', '不是所有新闻站都适合这种密度，但 QDaily 的气质恰好需要它。', '在秩序清晰的前提下，越密越能形成一种被编辑过的饱满感。', 'published', '2026-03-30T12:15:00+08:00', 14, 43, 'linear-gradient(135deg, #1b2e36 0%, #385d63 100%)', 'richard-cao', '7 分钟', '蓝灰色信息墙', 'smart'),
+  ('yellow-and-black-brand-skeleton', 'story-5', '黄与黑不是点缀，而是整个界面的品牌骨架。', '按钮、分隔线、数据卡和 hover 状态都围绕这组颜色建立辨识度。', 'published', '2026-03-30T12:48:00+08:00', 8, 31, 'linear-gradient(135deg, #f3d967 0%, #6c4a06 100%)', 'richard-cao', '4 分钟', '高对比黄黑视觉', 'fashion'),
+  ('next-card-should-also-be-worth-reading', 'story-6', '好的杂志式首页会让用户觉得下一张卡片也值得看。', '信息瀑布必须有节奏变化，否则它只会变成长长的疲劳滚动。', 'published', '2026-03-30T13:10:00+08:00', 17, 37, 'linear-gradient(135deg, #512f45 0%, #181017 100%)', 'richard-cao', '5 分钟', '暗色娱乐版面', 'entertainment'),
+  ('feature-cards-need-clear-boundaries', 'story-7', '专题卡和常规文章卡的边界要明显，这样首屏才会像一份刊物。', '专题使用更厚重的视觉和更长的文字区，常规卡片则更利落、重复、清晰。', 'published', '2026-03-30T13:40:00+08:00', 7, 24, 'linear-gradient(135deg, #7f7a55 0%, #262212 100%)', 'richard-cao', '6 分钟', '专题卡与杂志跨页', 'culture'),
+  ('cms-ready-editorial-system', 'story-8', '如果后续接 CMS，这套首页只需要换数据源，不需要推倒重来。', '组件拆分会围绕栏目、专题、文章和编辑推荐这些稳定内容模型来做。', 'published', '2026-03-30T14:05:00+08:00', 11, 29, 'linear-gradient(135deg, #8b431f 0%, #21130d 100%)', 'richard-cao', '6 分钟', '编辑系统与内容模型', 'business')
 on conflict (slug) do update set
   legacy_id = excluded.legacy_id,
   title = excluded.title,
   excerpt = excluded.excerpt,
+  status = excluded.status,
   published_at = excluded.published_at,
   comments_count = excluded.comments_count,
   likes_count = excluded.likes_count,
