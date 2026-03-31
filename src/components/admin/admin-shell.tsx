@@ -9,6 +9,22 @@ export type AdminState = {
     pendingCount: number;
     approvedCount: number;
   };
+  users: Array<{
+    id: string;
+    displayName: string;
+    email: string;
+    likeCount: number;
+    bookmarkCount: number;
+    commentCount: number;
+  }>;
+  articles: Array<{
+    articleSlug: string;
+    title: string;
+    likeCount: number;
+    bookmarkCount: number;
+    approvedCommentCount: number;
+    pendingCommentCount: number;
+  }>;
   comments: Array<{
     id: string;
     articleSlug: string;
@@ -46,6 +62,41 @@ export function AdminShell({ state, onModerate }: AdminShellProps) {
           </section>
 
           <section className={styles.queue}>
+            <h2 className={styles.sectionHeading}>用户概览</h2>
+            <ul>
+              {state.users.length === 0 ? <li className={styles.empty}>当前还没有可展示的用户数据。</li> : null}
+              {state.users.map((user) => (
+                <li key={user.id} className={styles.card}>
+                  <div className={styles.meta}>
+                    <strong>{user.displayName}</strong>
+                    <span>{user.email}</span>
+                  </div>
+                  <p>{user.likeCount} 赞 / {user.bookmarkCount} 收藏 / {user.commentCount} 评论</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className={styles.queue}>
+            <h2 className={styles.sectionHeading}>文章互动统计</h2>
+            <ul>
+              {state.articles.length === 0 ? <li className={styles.empty}>当前还没有文章互动数据。</li> : null}
+              {state.articles.map((article) => (
+                <li key={article.articleSlug} className={styles.card}>
+                  <div className={styles.meta}>
+                    <strong>{article.title}</strong>
+                    <span>{article.articleSlug}</span>
+                  </div>
+                  <p>
+                    {article.likeCount} 赞 / {article.bookmarkCount} 收藏 / {article.approvedCommentCount} 已通过 / {article.pendingCommentCount} 待审核
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className={styles.queue}>
+            <h2 className={styles.sectionHeading}>评论审核队列</h2>
             <ul>
               {state.comments.length === 0 ? <li className={styles.empty}>当前没有待处理评论。</li> : null}
               {state.comments.map((comment) => (

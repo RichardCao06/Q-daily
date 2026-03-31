@@ -12,6 +12,8 @@ const initialState: AdminState = {
     pendingCount: 0,
     approvedCount: 0,
   },
+  users: [],
+  articles: [],
   comments: [],
 };
 

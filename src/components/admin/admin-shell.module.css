@@ -58,10 +58,16 @@
   border-radius: 999px;
 }
 
+.sectionHeading {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
 .queue ul {
   display: grid;
   gap: 14px;
   list-style: none;
+  margin-top: 16px;
 }
 
 .card {

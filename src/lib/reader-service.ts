@@ -247,6 +247,8 @@ export async function loadAdminState(accessToken?: string): Promise<AdminState> 
         pendingCount: 0,
         approvedCount: 0,
       },
+      users: [],
+      articles: [],
       comments: [],
     };
   }
@@ -259,6 +261,8 @@ export async function loadAdminState(accessToken?: string): Promise<AdminState> 
         pendingCount: 0,
         approvedCount: 0,
       },
+      users: [],
+      articles: [],
       comments: [],
     };
   }
@@ -278,6 +282,8 @@ export async function loadAdminState(accessToken?: string): Promise<AdminState> 
         pendingCount: 0,
         approvedCount: 0,
       },
+      users: [],
+      articles: [],
       comments: [],
     };
   }
@@ -292,6 +298,8 @@ export async function loadAdminState(accessToken?: string): Promise<AdminState> 
         pendingCount: 0,
         approvedCount: 0,
       },
+      users: [],
+      articles: [],
       comments: [],
     };
   }
@@ -313,10 +321,16 @@ export async function loadAdminState(accessToken?: string): Promise<AdminState> 
   const articleSlugs = Array.from(new Set(pendingRows.map((row) => row.article_slug)));
   const userIds = Array.from(new Set(pendingRows.map((row) => row.user_id)));
 
-  const [articlesResult, profilesResult, approvedResult] = await Promise.all([
+  const [articlesResult, profilesResult, approvedResult, usersResult, articleSummaryResult] = await Promise.all([
     articleSlugs.length > 0 ? db.from("articles").select("slug,title").in("slug", articleSlugs) : { data: [] as Array<{ slug: string; title: string }> },
     userIds.length > 0 ? db.from("profiles").select("id,display_name").in("id", userIds) : { data: [] as Array<{ id: string; display_name: string }> },
     db.from("comments").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    db.from("admin_user_overview").select("id,display_name,email,like_count,bookmark_count,comment_count").order("created_at", { ascending: false }).limit(8),
+    db
+      .from("admin_article_engagement")
+      .select("article_slug,title,like_count,bookmark_count,approved_comment_count,pending_comment_count")
+      .order("pending_comment_count", { ascending: false })
+      .limit(8),
   ]);
 
   const articleTitles = new Map(((articlesResult.data ?? []) as Array<{ slug: string; title: string }>).map((article) => [article.slug, article.title]));
@@ -329,6 +343,36 @@ export async function loadAdminState(accessToken?: string): Promise<AdminState> 
       pendingCount: pendingRows.length,
       approvedCount: approvedResult.count ?? 0,
     },
+    users: ((usersResult.data ?? []) as Array<{
+      id: string;
+      display_name: string | null;
+      email: string | null;
+      like_count: number | null;
+      bookmark_count: number | null;
+      comment_count: number | null;
+    }>).map((userRow) => ({
+      id: userRow.id,
+      displayName: userRow.display_name ?? "Q-daily 读者",
+      email: userRow.email ?? "",
+      likeCount: userRow.like_count ?? 0,
+      bookmarkCount: userRow.bookmark_count ?? 0,
+      commentCount: userRow.comment_count ?? 0,
+    })),
+    articles: ((articleSummaryResult.data ?? []) as Array<{
+      article_slug: string | null;
+      title: string | null;
+      like_count: number | null;
+      bookmark_count: number | null;
+      approved_comment_count: number | null;
+      pending_comment_count: number | null;
+    }>).map((articleRow) => ({
+      articleSlug: articleRow.article_slug ?? "",
+      title: articleRow.title ?? articleRow.article_slug ?? "未命名文章",
+      likeCount: articleRow.like_count ?? 0,
+      bookmarkCount: articleRow.bookmark_count ?? 0,
+      approvedCommentCount: articleRow.approved_comment_count ?? 0,
+      pendingCommentCount: articleRow.pending_comment_count ?? 0,
+    })),
     comments: pendingRows.map((row) => ({
       id: row.id,
       articleSlug: row.article_slug,
