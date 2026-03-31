@@ -1,5 +1,5 @@
-import { LoginPanel } from "@/components/auth/login-panel";
+import { AccountClientPage } from "./client-page";
 
 export default function AccountRoute() {
-  return <LoginPanel />;
+  return <AccountClientPage />;
 }

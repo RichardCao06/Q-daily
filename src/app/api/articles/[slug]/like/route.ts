@@ -12,6 +12,8 @@ export async function POST(request: Request, { params }: RouteProps) {
   try {
     const { active } = (await request.json()) as { active?: boolean };
     const auth = await requireAuthenticatedSupabase(request.headers);
+    // Temporary escape hatch until the Supabase types are regenerated for the new tables.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = auth.supabase as any;
 
     await ensureProfile(auth.supabase, auth.user);
