@@ -3,6 +3,7 @@ import { SupportPage } from "@/components/site/support-page";
 export default function SpecialColumnsRoute() {
   return (
     <SupportPage
+      currentLabel="栏目中心"
       eyebrow="Columns"
       title="栏目中心"
       description="栏目中心用于汇总长期稳定运营的栏目、专题线和编辑系列。"

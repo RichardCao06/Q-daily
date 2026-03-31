@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
-import { channelLinks, type Article } from "@/lib/qdaily-data";
+import { type Article } from "@/lib/qdaily-data";
 
+import { SiteHeader } from "./site-header";
 import styles from "./collection-page.module.css";
 
 type CollectionPageProps = {
@@ -14,30 +15,20 @@ type CollectionPageProps = {
 export function CollectionPage({ title, description, stories }: CollectionPageProps) {
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <Link className={styles.logo} href="/">
-            <span className={styles.logoMark}>Q</span>
-            <span className={styles.logoText}>
-              <strong>好奇心日报</strong>
-              <span>QDaily</span>
-            </span>
-          </Link>
-          <nav className={styles.nav} aria-label="栏目导航">
-            {channelLinks.map((item) => (
-              <Link key={item.label} href={item.href} data-current={item.label === title}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <SiteHeader currentLabel={title} />
 
       <main className={styles.main}>
-        <section className={styles.hero}>
-          <span className={styles.eyebrow}>Collection</span>
-          <h1>{title}</h1>
-          <p>{description}</p>
+        <section className={styles.intro} aria-label="栏目页导语">
+          <section className={styles.hero}>
+            <span className={styles.eyebrow}>Collection</span>
+            <h1>{title}</h1>
+            <p>{description}</p>
+          </section>
+
+          <aside className={styles.note}>
+            <span>阅读索引</span>
+            <p>把栏目、标签和文章列表统一放回白底的编辑秩序里，让它和首页、文章页保持同一套呼吸感与留白。</p>
+          </aside>
         </section>
 
         <section className={styles.grid}>
@@ -51,7 +42,7 @@ export function CollectionPage({ title, description, stories }: CollectionPagePr
                 <Link href={`/articles/${story.slug}`}>
                   <div className={styles.cardVisual} style={cardStyle} />
                   <div className={styles.cardBody}>
-                    <span>{story.category.name}</span>
+                    <span className={styles.cardCategory}>{story.category.name}</span>
                     <h2>{story.title}</h2>
                     <p>{story.excerpt}</p>
                     <div className={styles.meta}>

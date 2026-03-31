@@ -1,6 +1,8 @@
-import { articles } from "@/lib/qdaily-data";
+import { getAllArticlesFromSource } from "@/lib/content-source";
 
-export function GET() {
+export async function GET() {
+  const articles = await getAllArticlesFromSource();
+
   const items = articles
     .map(
       (article) => `

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CollectionPage } from "@/components/site/collection-page";
-import { getAllTagSlugs, getArticlesByTag, getTagBySlug } from "@/lib/qdaily-data";
+import { getAllTagSlugsFromSource, getArticlesByTagFromSource, getTagBySlugFromSource } from "@/lib/content-source";
 import { buildCollectionMetadata } from "@/lib/metadata";
 
 type TagRouteProps = {
@@ -13,22 +13,24 @@ type TagRouteProps = {
 
 export default async function TagRoute({ params }: TagRouteProps) {
   const { slug } = await params;
-  const tag = getTagBySlug(slug);
+  const tag = await getTagBySlugFromSource(slug);
 
   if (!tag) {
     notFound();
   }
 
-  return <CollectionPage title={tag.name} description={`${tag.name}标签页`} stories={getArticlesByTag(slug)} />;
+  const stories = await getArticlesByTagFromSource(slug);
+
+  return <CollectionPage title={tag.name} description={`${tag.name}标签页`} stories={stories} />;
 }
 
-export function generateStaticParams() {
-  return getAllTagSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getAllTagSlugsFromSource()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: TagRouteProps): Promise<Metadata> {
   const { slug } = await params;
-  const tag = getTagBySlug(slug);
+  const tag = await getTagBySlugFromSource(slug);
 
   if (!tag) {
     return {};

@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Q-daily
 
-## Getting Started
+一个使用 Next.js 复刻 QDaily 编辑式新闻站点体验的项目。
 
-First, run the development server:
+## 本地开发
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+默认访问 [http://localhost:3000](http://localhost:3000)。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase 集成
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+项目已经接入 Supabase 数据层。页面会优先从 Supabase 读取文章、分类、标签、首页策展模块；如果环境变量缺失，会自动回退到本地种子数据。读者侧的登录、点赞、收藏、评论功能则需要 Supabase 可用。
 
-## Learn More
+1. 复制环境变量模板
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cp .env.example .env.local
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. 配置：
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-## Deploy on Vercel
+3. 在 Supabase 执行：
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `supabase/migrations/202603310001_initial_schema.sql`
+- `supabase/migrations/202603310002_reader_launch.sql`
+- `supabase/seed.sql`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. 在 Supabase Auth 中启用邮箱 OTP / magic link 登录，并把站点 URL 配置到当前环境。
+
+更详细的表结构设计见 [docs/supabase.md](./docs/supabase.md)。
+
+## 质量检查
+
+```bash
+pnpm test
+pnpm lint
+pnpm build
+```

@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CollectionPage } from "@/components/site/collection-page";
-import { getAllCategorySlugs, getArticlesByCategory, getCategoryBySlug } from "@/lib/qdaily-data";
+import {
+  getAllCategorySlugsFromSource,
+  getArticlesByCategoryFromSource,
+  getCategoryBySlugFromSource,
+} from "@/lib/content-source";
 import { buildCollectionMetadata } from "@/lib/metadata";
 
 type CategoryRouteProps = {
@@ -13,22 +17,24 @@ type CategoryRouteProps = {
 
 export default async function CategoryRoute({ params }: CategoryRouteProps) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlugFromSource(slug);
 
   if (!category) {
     notFound();
   }
 
-  return <CollectionPage title={category.name} description={`${category.name}栏目页`} stories={getArticlesByCategory(slug)} />;
+  const stories = await getArticlesByCategoryFromSource(slug);
+
+  return <CollectionPage title={category.name} description={`${category.name}栏目页`} stories={stories} />;
 }
 
-export function generateStaticParams() {
-  return getAllCategorySlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getAllCategorySlugsFromSource()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: CategoryRouteProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
+  const category = await getCategoryBySlugFromSource(slug);
 
   if (!category) {
     return {};

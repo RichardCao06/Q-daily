@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ArticlePage } from "@/components/site/article-page";
-import { getAllArticleSlugs, getArticleBySlug } from "@/lib/qdaily-data";
+import { getAllArticleSlugsFromSource, getArticleBySlugFromSource, getRelatedArticlesFromSource } from "@/lib/content-source";
 import { buildArticleMetadata } from "@/lib/metadata";
 
 type ArticleRouteProps = {
@@ -13,22 +13,24 @@ type ArticleRouteProps = {
 
 export default async function ArticleRoute({ params }: ArticleRouteProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlugFromSource(slug);
 
   if (!article) {
     notFound();
   }
 
-  return <ArticlePage article={article} />;
+  const relatedStories = await getRelatedArticlesFromSource(slug, 4);
+
+  return <ArticlePage article={article} relatedStories={relatedStories} />;
 }
 
-export function generateStaticParams() {
-  return getAllArticleSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getAllArticleSlugsFromSource()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ArticleRouteProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlugFromSource(slug);
 
   if (!article) {
     return {};

@@ -3,6 +3,7 @@ import { SupportPage } from "@/components/site/support-page";
 export default function AboutRoute() {
   return (
     <SupportPage
+      currentLabel="关于我们"
       eyebrow="About"
       title="关于我们"
       description="这个页面用于承接 QDaily 复刻站点的品牌说明、项目背景和后续扩展方向。"

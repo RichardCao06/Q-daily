@@ -22,6 +22,9 @@ describe("SupportPage", () => {
       />,
     );
 
+    expect(screen.getByRole("banner")).toHaveTextContent("好奇心日报");
+    expect(screen.getByRole("link", { name: "搜索" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "登录" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "关于我们" })).toBeInTheDocument();
     expect(screen.getByText("首页、文章页、分类页和标签页已经完成首版。")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "返回首页" })).toBeInTheDocument();

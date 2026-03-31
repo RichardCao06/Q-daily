@@ -13,6 +13,9 @@ describe("CollectionPage", () => {
 
     render(<CollectionPage title={category!.name} description="商业栏目页" stories={stories} />);
 
+    expect(screen.getByRole("banner")).toHaveTextContent("好奇心日报");
+    expect(screen.getByRole("link", { name: "搜索" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "关于我们" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "商业" })).toBeInTheDocument();
     expect(screen.getByText("商业栏目页")).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(stories.length);

@@ -11,6 +11,41 @@ export type Story = {
   palette: string;
 };
 
+export type SpotlightStory = {
+  slug: string;
+  category: string;
+  categoryHref: string;
+  title: string;
+  excerpt: string;
+  palette: string;
+};
+
+export type FeaturePanel = {
+  id: string;
+  slug: string;
+  category: string;
+  title: string;
+  excerpt: string;
+  palette: string;
+  href: string;
+};
+
+export type SideFeature = {
+  id: string;
+  category: string;
+  title: string;
+  excerpt: string;
+  palette: string;
+  href: string;
+};
+
+export type HomePageData = {
+  spotlightStory: SpotlightStory;
+  sideFeatures: SideFeature[];
+  featurePanels: FeaturePanel[];
+  feedStories: Story[];
+};
+
 export type SiteLink = {
   label: string;
   href: string;
@@ -290,10 +325,7 @@ export const utilityLinks: SiteLink[] = [
   { label: "关于我们", href: "/about" },
 ];
 
-export const spotlightStory: Omit<Story, "id" | "slug" | "publishedAt" | "comments" | "likes" | "categoryHref"> & {
-  slug: string;
-  categoryHref: string;
-} = {
+export const spotlightStory: SpotlightStory = {
   slug: articles[0].slug,
   category: "精选专题",
   categoryHref: articles[0].category.href,
@@ -302,7 +334,7 @@ export const spotlightStory: Omit<Story, "id" | "slug" | "publishedAt" | "commen
   palette: "linear-gradient(135deg, #0f1316 0%, #30373d 45%, #ffc81f 100%)",
 };
 
-export const sideFeatures = [
+export const sideFeatures: SideFeature[] = [
   {
     id: "latest",
     category: "今日要闻",
@@ -321,7 +353,7 @@ export const sideFeatures = [
   },
 ];
 
-export const featurePanels = [articles[6], articles[2]].map((article) => ({
+export const featurePanels: FeaturePanel[] = [articles[6], articles[2]].map((article) => ({
   id: article.id,
   slug: article.slug,
   category: article.category.name,

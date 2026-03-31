@@ -3,6 +3,7 @@ import { SupportPage } from "@/components/site/support-page";
 export default function LabsRoute() {
   return (
     <SupportPage
+      currentLabel="好奇心研究所"
       eyebrow="Labs"
       title="好奇心研究所"
       description="这里用来承接实验性专题、编辑策划和更具概念性的内容集合。"
