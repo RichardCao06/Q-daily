@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getRelatedArticles, type Article } from "@/lib/qdaily-data";
 
 import { ArticleEngagement } from "./article-engagement";
+import { LongformArticlePage } from "./longform-article";
 import styles from "./article-page.module.css";
 
 type ArticlePageProps = {
@@ -12,6 +13,10 @@ type ArticlePageProps = {
 };
 
 export function ArticlePage({ article, relatedStories = getRelatedArticles(article.slug, 4) }: ArticlePageProps) {
+  if (article.layout === "longform") {
+    return <LongformArticlePage article={article} relatedStories={relatedStories} />;
+  }
+
   const highlightedQuote = article.body[1] ?? article.excerpt;
 
   return (

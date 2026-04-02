@@ -18,6 +18,7 @@ import {
   type SpotlightStory,
   type Story,
 } from "./qdaily-data";
+import { loadMarkdownArticles } from "./markdown-articles";
 import { isPublishedStatus } from "./article-management";
 import type { Database } from "./supabase/database.types";
 import { getSupabaseServerClient } from "./supabase/server";
@@ -147,10 +148,16 @@ function mapHomepageModules(
 }
 
 const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
+  const markdownArticles = await loadMarkdownArticles();
   const supabase = getSupabaseServerClient();
 
   if (!supabase) {
-    return buildFallbackSnapshot();
+    const fallback = buildFallbackSnapshot();
+
+    return {
+      ...fallback,
+      articles: mergeArticles(fallback.articles, markdownArticles),
+    };
   }
 
   try {
@@ -253,15 +260,34 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
     const homeModules = mapHomepageModules(homepageModuleRows);
 
     return {
-      articles: siteArticles,
+      articles: mergeArticles(siteArticles, markdownArticles),
       categories,
       tags,
       ...homeModules,
     };
   } catch {
-    return buildFallbackSnapshot();
+    const fallback = buildFallbackSnapshot();
+
+    return {
+      ...fallback,
+      articles: mergeArticles(fallback.articles, markdownArticles),
+    };
   }
 });
+
+function mergeArticles(baseArticles: Article[], markdownArticles: Article[]) {
+  const articlesBySlug = new Map<string, Article>();
+
+  for (const article of baseArticles) {
+    articlesBySlug.set(article.slug, article);
+  }
+
+  for (const article of markdownArticles) {
+    articlesBySlug.set(article.slug, article);
+  }
+
+  return Array.from(articlesBySlug.values()).sort(sortByPublishedAt);
+}
 
 export async function getHomePageData(): Promise<HomePageData> {
   const snapshot = await loadSiteSnapshot();

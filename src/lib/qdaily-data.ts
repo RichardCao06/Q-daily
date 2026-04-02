@@ -78,7 +78,32 @@ export type Article = {
   body: string[];
   category: SiteCategory;
   tags: SiteTag[];
+  layout?: "standard" | "longform";
+  source?: "seed" | "supabase" | "markdown";
+  heroImage?: {
+    src: string;
+    alt: string;
+    caption?: string;
+  };
+  longformBlocks?: ArticleLongformBlock[];
 };
+
+export type ArticleLongformBlock =
+  | {
+      type: "paragraph";
+      content: string;
+    }
+  | {
+      type: "heading";
+      level: 2 | 3;
+      content: string;
+    }
+  | {
+      type: "image";
+      src: string;
+      alt: string;
+      caption?: string;
+    };
 
 const categorySeed = [
   { slug: "business", name: "商业" },
