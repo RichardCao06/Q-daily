@@ -33,15 +33,33 @@ const article = {
 } satisfies Article;
 
 describe("LongformArticlePage", () => {
-  it("renders the longform hero, image captions, and section rhythm", () => {
+  it("renders longform content in a single markdown-faithful document flow", () => {
     render(<LongformArticlePage article={article} relatedStories={[]} />);
 
-    expect(screen.getByRole("heading", { level: 1, name: article.title })).toBeInTheDocument();
-    expect(screen.getByAltText("WSBK 葡萄牙站庆祝现场")).toBeInTheDocument();
+    const title = screen.getByRole("heading", { level: 1, name: article.title });
+    const excerpt = screen.getByText(article.excerpt);
+    const heroImage = screen.getByAltText("WSBK 葡萄牙站庆祝现场");
+    const firstParagraph = screen.getByText("很多人先认识张雪，不是因为一辆车。");
+    const inlineImage = screen.getByAltText("500RR");
+    const sectionHeading = screen.getByRole("heading", { level: 2, name: "冠军之后，问题才真正开始" });
+
+    const story = firstParagraph.closest("article");
+
+    expect(story).not.toBeNull();
+    expect(story).toContainElement(title);
+    expect(story).toContainElement(excerpt);
+    expect(story).toContainElement(heroImage);
+    expect(story).toContainElement(inlineImage);
+    expect(story).toContainElement(sectionHeading);
+
     expect(screen.getByText("图注：WSBK 葡萄牙站夺冠后的庆祝现场。")).toBeInTheDocument();
-    expect(screen.getByAltText("500RR")).toBeInTheDocument();
     expect(screen.getByText("图注：500RR 官方产品图。")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "冠军之后，问题才真正开始" })).toBeInTheDocument();
-    expect(screen.getByText("很多人先认识张雪，不是因为一辆车。")).toBeInTheDocument();
+    expect(screen.queryByText("栏目")).not.toBeInTheDocument();
+    expect(screen.queryByText("标签")).not.toBeInTheDocument();
+
+    expect(title.compareDocumentPosition(heroImage) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heroImage.compareDocumentPosition(firstParagraph) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(firstParagraph.compareDocumentPosition(inlineImage) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(inlineImage.compareDocumentPosition(sectionHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
