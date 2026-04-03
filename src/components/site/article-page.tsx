@@ -4,7 +4,6 @@ import Link from "next/link";
 import { getRelatedArticles, type Article } from "@/lib/qdaily-data";
 
 import { ArticleEngagement } from "./article-engagement";
-import { LongformArticlePage } from "./longform-article";
 import styles from "./article-page.module.css";
 
 type ArticlePageProps = {
@@ -13,11 +12,14 @@ type ArticlePageProps = {
 };
 
 export function ArticlePage({ article, relatedStories = getRelatedArticles(article.slug, 4) }: ArticlePageProps) {
-  if (article.layout === "longform") {
-    return <LongformArticlePage article={article} relatedStories={relatedStories} />;
-  }
-
   const highlightedQuote = article.body[1] ?? article.excerpt;
+  const storyBlocks =
+    article.longformBlocks && article.longformBlocks.length > 0
+      ? article.longformBlocks
+      : article.body.map((paragraph) => ({
+          type: "paragraph" as const,
+          content: paragraph,
+        }));
 
   return (
     <div className={styles.page}>
@@ -67,22 +69,50 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
                     {article.comments} 评论 / {article.likes} 喜欢
                   </span>
                 </div>
-                <div
-                  className={styles.storyVisual}
-                  style={
-                    {
-                      "--article-gradient": article.palette,
-                    } as CSSProperties
-                  }
-                >
-                  <span>{article.coverAlt}</span>
-                </div>
+                {article.heroImage ? (
+                  <figure className={styles.storyMedia}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className={styles.storyImage} src={article.heroImage.src} alt={article.heroImage.alt} />
+                    {article.heroImage.caption ? <figcaption className={styles.storyCaption}>{article.heroImage.caption}</figcaption> : null}
+                  </figure>
+                ) : (
+                  <div
+                    className={styles.storyVisual}
+                    style={
+                      {
+                        "--article-gradient": article.palette,
+                      } as CSSProperties
+                    }
+                  >
+                    <span>{article.coverAlt}</span>
+                  </div>
+                )}
               </header>
 
               <section className={styles.storyBody}>
-                {article.body.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
+                {storyBlocks.map((block, index) => {
+                  if (block.type === "paragraph") {
+                    return <p key={`${block.type}-${index}`}>{block.content}</p>;
+                  }
+
+                  if (block.type === "heading") {
+                    const HeadingTag = block.level === 3 ? "h3" : "h2";
+
+                    return (
+                      <HeadingTag key={`${block.type}-${index}`} className={styles.storySectionHeading}>
+                        {block.content}
+                      </HeadingTag>
+                    );
+                  }
+
+                  return (
+                    <figure key={`${block.type}-${index}`} className={styles.storyMedia}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className={styles.storyImage} src={block.src} alt={block.alt} />
+                      {block.caption ? <figcaption className={styles.storyCaption}>{block.caption}</figcaption> : null}
+                    </figure>
+                  );
+                })}
               </section>
             </section>
 
