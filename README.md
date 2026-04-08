@@ -23,6 +23,7 @@ cp .env.example .env.local
 
 2. 配置：
 
+- `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 

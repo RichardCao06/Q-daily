@@ -5,8 +5,10 @@ describe("metadata helpers", () => {
   it("builds homepage metadata", () => {
     const metadata = buildHomeMetadata();
 
-    expect(metadata.title).toBe("Q-daily Recreation");
-    expect(metadata.description).toContain("QDaily");
+    expect(metadata.title).toBe("Q-daily");
+    expect(metadata.description).toContain("Q-daily");
+    expect(metadata.alternates?.canonical).toBe("https://piggpywithpuppy.cn");
+    expect(metadata.openGraph?.url).toBe("https://piggpywithpuppy.cn");
   });
 
   it("builds article metadata from article content", () => {
@@ -16,6 +18,8 @@ describe("metadata helpers", () => {
     expect(metadata.title).toContain(article!.title);
     expect(metadata.title).toContain(article!.category.name);
     expect(metadata.description).toBe(article!.excerpt);
+    expect(metadata.alternates?.canonical).toBe(`https://piggpywithpuppy.cn/articles/${article!.slug}`);
+    expect(metadata.openGraph?.url).toBe(`https://piggpywithpuppy.cn/articles/${article!.slug}`);
   });
 
   it("builds collection metadata for categories and tags", () => {
@@ -24,5 +28,11 @@ describe("metadata helpers", () => {
 
     expect(buildCollectionMetadata(category!, "category").title).toContain("商业");
     expect(buildCollectionMetadata(tag!, "tag").title).toContain("长文章");
+    expect(buildCollectionMetadata(category!, "category").alternates?.canonical).toBe(
+      "https://piggpywithpuppy.cn/categories/business",
+    );
+    expect(buildCollectionMetadata(tag!, "tag").alternates?.canonical).toBe(
+      "https://piggpywithpuppy.cn/tags/longform",
+    );
   });
 });

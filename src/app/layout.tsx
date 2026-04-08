@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { getSiteUrl, siteDescription, siteName } from "@/lib/site-config";
+
 export const metadata: Metadata = {
-  title: "Q-daily Recreation",
-  description: "A Next.js recreation of the archived QDaily homepage editorial experience.",
+  metadataBase: new URL(getSiteUrl()),
+  title: siteName,
+  description: siteDescription,
 };
 
 export default function RootLayout({

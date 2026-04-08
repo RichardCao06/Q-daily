@@ -52,6 +52,7 @@
    - `supabase/migrations/202603310003_article_management.sql`
 2. 执行 `supabase/seed.sql`
 3. 配置环境变量：
+   - `NEXT_PUBLIC_SITE_URL`
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 4. 在 Supabase Auth 中启用邮箱 OTP / magic link 登录。

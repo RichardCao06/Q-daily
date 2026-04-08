@@ -1,4 +1,5 @@
 import { getAllArticlesFromSource } from "@/lib/content-source";
+import { buildAbsoluteUrl, siteDescription, siteName } from "@/lib/site-config";
 
 export async function GET() {
   const articles = await getAllArticlesFromSource();
@@ -8,7 +9,7 @@ export async function GET() {
       (article) => `
         <item>
           <title><![CDATA[${article.title}]]></title>
-          <link>https://example.com/articles/${article.slug}</link>
+          <link>${buildAbsoluteUrl(`/articles/${article.slug}`)}</link>
           <description><![CDATA[${article.excerpt}]]></description>
           <pubDate>${new Date(article.publishedAt.replace(" ", "T")).toUTCString()}</pubDate>
         </item>`,
@@ -18,9 +19,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8" ?>
     <rss version="2.0">
       <channel>
-        <title>Q-daily Recreation</title>
-        <link>https://example.com</link>
-        <description>QDaily recreation feed</description>
+        <title>${siteName}</title>
+        <link>${buildAbsoluteUrl("/")}</link>
+        <description>${siteDescription}</description>
         ${items}
       </channel>
     </rss>`;
