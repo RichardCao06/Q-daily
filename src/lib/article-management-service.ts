@@ -1,4 +1,5 @@
 import { buildArticleMutation, joinArticleBody, type ArticleMutationInput, type ArticleStatus } from "./article-management";
+import { buildMarkdownImportPayload } from "./markdown-import";
 import { getSupabaseServerClient } from "./supabase/server";
 
 type Option = {
@@ -106,6 +107,79 @@ async function requireAdminContext(accessToken?: string) {
   }
 
   return context;
+}
+
+async function persistArticleRecords(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+  userId: string,
+  payload: {
+    article: {
+      slug: string;
+      title: string;
+      excerpt: string;
+      status: ArticleStatus;
+      publishedAt: string | null;
+      palette: string;
+      authorSlug: string;
+      readingTime: string;
+      coverAlt: string;
+      categorySlug: string;
+    };
+    tagSlugs: string[];
+    blocks: Array<{
+      position: number;
+      kind: string;
+      content: string;
+    }>;
+  },
+) {
+  const articleResult = await db.from("articles").insert({
+    slug: payload.article.slug,
+    legacy_id: null,
+    title: payload.article.title,
+    excerpt: payload.article.excerpt,
+    status: payload.article.status,
+    published_at: payload.article.publishedAt,
+    comments_count: 0,
+    likes_count: 0,
+    palette: payload.article.palette,
+    author_slug: payload.article.authorSlug,
+    reading_time: payload.article.readingTime,
+    cover_alt: payload.article.coverAlt,
+    category_slug: payload.article.categorySlug,
+    updated_by: userId,
+  });
+
+  if (articleResult.error) {
+    throw new Error(articleResult.error.message);
+  }
+
+  const blocksResult = await db.from("article_blocks").insert(
+    payload.blocks.map((block) => ({
+      article_slug: payload.article.slug,
+      position: block.position,
+      content: block.content,
+      kind: block.kind,
+    })),
+  );
+
+  if (blocksResult.error) {
+    throw new Error(blocksResult.error.message);
+  }
+
+  if (payload.tagSlugs.length > 0) {
+    const tagsResult = await db.from("article_tags").insert(
+      payload.tagSlugs.map((tagSlug) => ({
+        article_slug: payload.article.slug,
+        tag_slug: tagSlug,
+      })),
+    );
+
+    if (tagsResult.error) {
+      throw new Error(tagsResult.error.message);
+    }
+  }
 }
 
 async function loadEditorOptions(
@@ -288,52 +362,40 @@ export async function createAdminArticle(input: ArticleMutationInput, accessToke
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = context.supabase as any;
 
-  const articleResult = await db.from("articles").insert({
-    slug: payload.article.slug,
-    legacy_id: null,
-    title: payload.article.title,
-    excerpt: payload.article.excerpt,
-    status: payload.article.status,
-    published_at: payload.article.publishedAt,
-    comments_count: 0,
-    likes_count: 0,
-    palette: payload.article.palette,
-    author_slug: payload.article.authorSlug,
-    reading_time: payload.article.readingTime,
-    cover_alt: payload.article.coverAlt,
-    category_slug: payload.article.categorySlug,
-    updated_by: context.userId,
-  });
-
-  if (articleResult.error) {
-    throw new Error(articleResult.error.message);
-  }
-
-  const blocksResult = await db.from("article_blocks").insert(
-    payload.body.map((paragraph, index) => ({
-      article_slug: payload.article.slug,
+  await persistArticleRecords(db, context.userId, {
+    article: payload.article,
+    tagSlugs: payload.tagSlugs,
+    blocks: payload.body.map((paragraph, index) => ({
       position: index + 1,
       content: paragraph,
       kind: "paragraph",
     })),
-  );
+  });
 
-  if (blocksResult.error) {
-    throw new Error(blocksResult.error.message);
-  }
+  return {
+    slug: payload.article.slug,
+  };
+}
 
-  if (payload.tagSlugs.length > 0) {
-    const tagsResult = await db.from("article_tags").insert(
-      payload.tagSlugs.map((tagSlug) => ({
-        article_slug: payload.article.slug,
-        tag_slug: tagSlug,
-      })),
-    );
+export async function importMarkdownAdminArticle(
+  input: {
+    markdown: string;
+    authorSlug: string;
+    status?: ArticleStatus;
+  },
+  accessToken?: string,
+) {
+  const context = await requireAdminContext(accessToken);
+  const payload = buildMarkdownImportPayload(input.markdown, {
+    authorSlug: input.authorSlug,
+    status: input.status,
+  });
 
-    if (tagsResult.error) {
-      throw new Error(tagsResult.error.message);
-    }
-  }
+  // Temporary escape hatch until the Supabase types are regenerated for the new tables.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = context.supabase as any;
+
+  await persistArticleRecords(db, context.userId, payload);
 
   return {
     slug: payload.article.slug,

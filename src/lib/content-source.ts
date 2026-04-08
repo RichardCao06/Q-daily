@@ -3,6 +3,7 @@ import { cache } from "react";
 import {
   articles as fallbackArticles,
   featurePanels as fallbackFeaturePanels,
+  type ArticleLongformBlock,
   getCategoryBySlug,
   getTagBySlug,
   sideFeatures as fallbackSideFeatures,
@@ -18,6 +19,7 @@ import {
   type SpotlightStory,
   type Story,
 } from "./qdaily-data";
+import { deserializeStoredArticleBlock, deserializeStoredHeroImage } from "./markdown-import";
 import { loadMarkdownArticles } from "./markdown-articles";
 import { isPublishedStatus } from "./article-management";
 import type { Database } from "./supabase/database.types";
@@ -207,16 +209,32 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
     const authorsBySlug = new Map(authorRows.map((author) => [author.slug, author.name]));
     const categoriesBySlug = new Map(categories.map((category) => [category.slug, category]));
     const tagsBySlug = new Map(tags.map((tag) => [tag.slug, tag]));
-    const articleBlocksBySlug = new Map<string, string[]>();
+    const articleBlocksBySlug = new Map<string, ArticleLongformBlock[]>();
+    const articleHeroImagesBySlug = new Map<string, NonNullable<Article["heroImage"]>>();
     const articleTagsBySlug = new Map<string, string[]>();
 
     for (const block of blockRows) {
-      if (block.kind !== "paragraph") {
+      const heroImage = deserializeStoredHeroImage({
+        kind: block.kind,
+        content: block.content,
+      });
+
+      if (heroImage) {
+        articleHeroImagesBySlug.set(block.article_slug, heroImage);
+        continue;
+      }
+
+      const decodedBlock = deserializeStoredArticleBlock({
+        kind: block.kind,
+        content: block.content,
+      });
+
+      if (!decodedBlock) {
         continue;
       }
 
       const existingBlocks = articleBlocksBySlug.get(block.article_slug) ?? [];
-      existingBlocks.push(block.content);
+      existingBlocks.push(decodedBlock);
       articleBlocksBySlug.set(block.article_slug, existingBlocks);
     }
 
@@ -226,19 +244,21 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
       articleTagsBySlug.set(articleTag.article_slug, existingTags);
     }
 
-    const siteArticles: Article[] = articleRows
+    const siteArticles = articleRows
       .filter((article) => isPublishedStatus(article.status))
-      .map((article) => {
+      .flatMap((article) => {
         const category = categoriesBySlug.get(article.category_slug);
         if (!category) {
-          return null;
+          return [];
         }
 
         const resolvedTags = (articleTagsBySlug.get(article.slug) ?? [])
           .map((tagSlug) => tagsBySlug.get(tagSlug))
           .filter((tag): tag is SiteTag => Boolean(tag));
 
-        return {
+        const resolvedBlocks = articleBlocksBySlug.get(article.slug) ?? [];
+
+        return [{
           id: article.legacy_id ?? article.slug,
           slug: article.slug,
           title: article.title,
@@ -250,12 +270,13 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
           author: authorsBySlug.get(article.author_slug) ?? article.author_slug,
           readingTime: article.reading_time,
           coverAlt: article.cover_alt,
-          body: articleBlocksBySlug.get(article.slug) ?? [],
+          body: resolvedBlocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
           category,
           tags: resolvedTags,
-        } satisfies Article;
-      })
-      .filter((article): article is Article => Boolean(article));
+          heroImage: articleHeroImagesBySlug.get(article.slug),
+          longformBlocks: resolvedBlocks.length > 0 ? resolvedBlocks : undefined,
+        } satisfies Article];
+      });
 
     const homeModules = mapHomepageModules(homepageModuleRows);
 
