@@ -299,6 +299,24 @@
     var(--card-gradient);
 }
 
+.visualCover,
+.visualScrim {
+  position: absolute;
+  inset: 0;
+}
+
+.visualCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.visualScrim {
+  background:
+    linear-gradient(180deg, rgb(11 16 18 / 0.04), rgb(11 16 18 / 0.18)),
+    radial-gradient(circle at top right, rgb(255 255 255 / 0.24), transparent 24%);
+}
+
 .visualImage::after {
   position: absolute;
   inset: 0;

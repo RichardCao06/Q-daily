@@ -32,4 +32,20 @@ describe("CollectionPage", () => {
     expect(screen.getByRole("heading", { level: 1, name: "长文章" })).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(stories.length);
   });
+
+  it("renders card cover images when a story provides them", () => {
+    const stories = [
+      {
+        ...getArticlesByTag("longform")[0]!,
+        heroImage: {
+          src: "/editorial/avo-paper/paper-firstpage-1.png",
+          alt: "AVO 论文首页",
+        },
+      },
+    ];
+
+    render(<CollectionPage title="长文章" description="长文章标签页" stories={stories} />);
+
+    expect(screen.getByAltText("AVO 论文首页")).toBeInTheDocument();
+  });
 });

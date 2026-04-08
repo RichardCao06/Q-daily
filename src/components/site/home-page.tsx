@@ -19,6 +19,10 @@ type VisualCardProps = {
   title: string;
   excerpt: string;
   palette: string;
+  coverImage?: {
+    src: string;
+    alt: string;
+  };
   publishedAt?: string;
   comments?: number;
   likes?: number;
@@ -32,6 +36,7 @@ function VisualCard({
   title,
   excerpt,
   palette,
+  coverImage,
   publishedAt,
   comments,
   likes,
@@ -47,6 +52,13 @@ function VisualCard({
   return (
     <article className={`${styles.visualCard} ${className ?? ""}`.trim()} style={cardStyle}>
       <div className={styles.visualImage}>
+        {coverImage ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.visualCover} src={coverImage.src} alt={coverImage.alt} />
+            <div className={styles.visualScrim} />
+          </>
+        ) : null}
         <span className={`${styles.visualCategory} ${accent === "light" ? styles.visualCategoryLight : ""}`.trim()}>
           {category}
         </span>

@@ -72,6 +72,12 @@ function buildFeedStories(siteArticles: Article[]): Story[] {
     comments: article.comments,
     likes: article.likes,
     palette: article.palette,
+    coverImage: article.heroImage
+      ? {
+          src: article.heroImage.src,
+          alt: article.heroImage.alt,
+        }
+      : undefined,
   }));
 }
 
@@ -114,15 +120,16 @@ function mapHomepageModules(
 
   return {
     spotlightStory: spotlightRow
-      ? {
-          slug: spotlightRow.article_slug ?? fallbackSpotlightStory.slug,
-          category: spotlightRow.category_label,
-          categoryHref: spotlightRow.href,
-          title: spotlightRow.title,
-          excerpt: spotlightRow.excerpt,
-          palette: spotlightRow.palette,
-        }
-      : fallbackSpotlightStory,
+        ? {
+            slug: spotlightRow.article_slug ?? fallbackSpotlightStory.slug,
+            category: spotlightRow.category_label,
+            categoryHref: spotlightRow.href,
+            title: spotlightRow.title,
+            excerpt: spotlightRow.excerpt,
+            palette: spotlightRow.palette,
+            coverImage: undefined,
+          }
+        : fallbackSpotlightStory,
     featurePanels:
       featureRows.length > 0
         ? featureRows.map((row) => ({
@@ -133,6 +140,7 @@ function mapHomepageModules(
             excerpt: row.excerpt,
             palette: row.palette,
             href: row.href,
+            coverImage: undefined,
           }))
         : [...fallbackFeaturePanels],
     sideFeatures:
@@ -144,6 +152,7 @@ function mapHomepageModules(
             excerpt: row.excerpt,
             palette: row.palette,
             href: row.href,
+            coverImage: undefined,
           }))
         : [...fallbackSideFeatures],
   };

@@ -29,4 +29,34 @@ describe("HomePage", () => {
     );
     expect(screen.getAllByRole("contentinfo").at(-1)).toHaveTextContent("下载 APP");
   });
+
+  it("renders article cover images on cards when the content source provides them", () => {
+    render(
+      <HomePage
+        data={{
+          spotlightStory: {
+            ...spotlightStory,
+            coverImage: {
+              src: "/editorial/avo-paper/paper-firstpage-1.png",
+              alt: "AVO 论文首页",
+            },
+          },
+          sideFeatures,
+          featurePanels,
+          feedStories: [
+            {
+              ...feedStories[0]!,
+              coverImage: {
+                src: "/editorial/heqiong-profile/hero-heqiong-1.jpg",
+                alt: "何琼与张雪",
+              },
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByAltText("AVO 论文首页")).toBeInTheDocument();
+    expect(screen.getByAltText("何琼与张雪")).toBeInTheDocument();
+  });
 });

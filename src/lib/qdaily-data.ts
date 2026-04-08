@@ -9,6 +9,10 @@ export type Story = {
   comments: number;
   likes: number;
   palette: string;
+  coverImage?: {
+    src: string;
+    alt: string;
+  };
 };
 
 export type SpotlightStory = {
@@ -18,6 +22,10 @@ export type SpotlightStory = {
   title: string;
   excerpt: string;
   palette: string;
+  coverImage?: {
+    src: string;
+    alt: string;
+  };
 };
 
 export type FeaturePanel = {
@@ -28,6 +36,10 @@ export type FeaturePanel = {
   excerpt: string;
   palette: string;
   href: string;
+  coverImage?: {
+    src: string;
+    alt: string;
+  };
 };
 
 export type SideFeature = {
@@ -37,6 +49,10 @@ export type SideFeature = {
   excerpt: string;
   palette: string;
   href: string;
+  coverImage?: {
+    src: string;
+    alt: string;
+  };
 };
 
 export type HomePageData = {

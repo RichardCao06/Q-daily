@@ -40,7 +40,15 @@ export function CollectionPage({ title, description, stories }: CollectionPagePr
             return (
               <article key={story.slug} className={styles.card}>
                 <Link href={`/articles/${story.slug}`}>
-                  <div className={styles.cardVisual} style={cardStyle} />
+                  <div className={styles.cardVisual} style={cardStyle}>
+                    {story.heroImage ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className={styles.cardCover} src={story.heroImage.src} alt={story.heroImage.alt} />
+                        <div className={styles.cardScrim} />
+                      </>
+                    ) : null}
+                  </div>
                   <div className={styles.cardBody}>
                     <span className={styles.cardCategory}>{story.category.name}</span>
                     <h2>{story.title}</h2>
