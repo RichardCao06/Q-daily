@@ -47,6 +47,22 @@ type AdminContext =
       supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>;
     };
 
+type AuthenticatedWriteContext =
+  | {
+      configured: false;
+      authenticated: false;
+    }
+  | {
+      configured: true;
+      authenticated: false;
+    }
+  | {
+      configured: true;
+      authenticated: true;
+      userId: string;
+      supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>;
+    };
+
 async function getAdminContext(accessToken?: string): Promise<AdminContext> {
   const supabase = getSupabaseServerClient(accessToken ? { accessToken } : {});
 
@@ -95,14 +111,50 @@ async function getAdminContext(accessToken?: string): Promise<AdminContext> {
   };
 }
 
-async function requireAdminContext(accessToken?: string) {
-  const context = await getAdminContext(accessToken);
+async function getAuthenticatedWriteContext(accessToken?: string): Promise<AuthenticatedWriteContext> {
+  const supabase = getSupabaseServerClient(accessToken ? { accessToken } : {});
+
+  if (!supabase) {
+    return {
+      configured: false,
+      authenticated: false,
+    };
+  }
+
+  if (!accessToken) {
+    return {
+      configured: true,
+      authenticated: false,
+    };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(accessToken);
+
+  if (!user) {
+    return {
+      configured: true,
+      authenticated: false,
+    };
+  }
+
+  return {
+    configured: true,
+    authenticated: true,
+    userId: user.id,
+    supabase,
+  };
+}
+
+async function requireAuthenticatedWriteContext(accessToken?: string) {
+  const context = await getAuthenticatedWriteContext(accessToken);
 
   if (!context.configured) {
     throw new Error("Supabase unavailable");
   }
 
-  if (!context.isAdmin) {
+  if (!context.authenticated) {
     throw new Error("Forbidden");
   }
 
@@ -355,7 +407,7 @@ export async function loadAdminArticleEditor(slug: string | null, accessToken?: 
 }
 
 export async function createAdminArticle(input: ArticleMutationInput, accessToken?: string) {
-  const context = await requireAdminContext(accessToken);
+  const context = await requireAuthenticatedWriteContext(accessToken);
   const payload = buildArticleMutation(input);
 
   // Temporary escape hatch until the Supabase types are regenerated for the new tables.
@@ -385,7 +437,7 @@ export async function importMarkdownAdminArticle(
   },
   accessToken?: string,
 ) {
-  const context = await requireAdminContext(accessToken);
+  const context = await requireAuthenticatedWriteContext(accessToken);
   const payload = buildMarkdownImportPayload(input.markdown, {
     authorSlug: input.authorSlug,
     status: input.status,
@@ -403,7 +455,7 @@ export async function importMarkdownAdminArticle(
 }
 
 export async function updateAdminArticle(slug: string, input: ArticleMutationInput, accessToken?: string) {
-  const context = await requireAdminContext(accessToken);
+  const context = await requireAuthenticatedWriteContext(accessToken);
   const payload = buildArticleMutation(input);
 
   if (payload.article.slug !== slug) {
@@ -475,7 +527,7 @@ export async function updateAdminArticle(slug: string, input: ArticleMutationInp
 }
 
 export async function setAdminArticleStatus(slug: string, status: ArticleStatus, accessToken?: string) {
-  const context = await requireAdminContext(accessToken);
+  const context = await requireAuthenticatedWriteContext(accessToken);
 
   // Temporary escape hatch until the Supabase types are regenerated for the new tables.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
