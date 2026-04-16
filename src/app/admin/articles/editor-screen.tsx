@@ -111,6 +111,54 @@ export function AdminArticleEditorScreen({ slug }: AdminArticleEditorScreenProps
     });
   }
 
+  function handleImportRepositoryMarkdown() {
+    startTransition(async () => {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
+        setError("Supabase 未配置");
+        return;
+      }
+
+      const browserClient = supabase;
+      const authorSlug = state.authors[0]?.slug;
+
+      if (!authorSlug) {
+        setError("当前没有可用作者，无法导入仓库文章");
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await browserClient.auth.getSession();
+
+      if (!session?.access_token) {
+        setError("请先登录管理员账号");
+        return;
+      }
+
+      const response = await fetch("/api/admin/articles/import", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          authorSlug,
+        }),
+      });
+
+      const payload = (await response.json()) as { imported?: string[]; error?: string };
+
+      if (!response.ok) {
+        setError(payload.error ?? "导入失败");
+        return;
+      }
+
+      router.push("/admin/articles");
+      router.refresh();
+    });
+  }
+
   async function handleUploadInlineImage(file: File, alt: string, currentSlug?: string) {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
@@ -218,6 +266,41 @@ export function AdminArticleEditorScreen({ slug }: AdminArticleEditorScreenProps
           >
             {error}
           </p>
+        ) : null}
+
+        {!slug ? (
+          <section
+            style={{
+              border: "1px solid var(--line-soft)",
+              borderRadius: "20px",
+              background: "#fffdf6",
+              padding: "18px 20px",
+              display: "grid",
+              gap: "10px",
+            }}
+          >
+            <div>
+              <strong style={{ display: "block", marginBottom: "4px" }}>从仓库导入现有 Markdown</strong>
+              <p style={{ margin: 0, color: "var(--ink-muted)" }}>把 `content/articles` 里的现有文章一次性同步到 Supabase，导入后页面会优先渲染数据库版本。</p>
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={handleImportRepositoryMarkdown}
+                disabled={isPending || state.authors.length === 0}
+                style={{
+                  borderRadius: "999px",
+                  padding: "10px 18px",
+                  font: "inherit",
+                  border: "1px solid var(--line-soft)",
+                  background: "#fff",
+                  cursor: isPending ? "progress" : "pointer",
+                }}
+              >
+                从仓库导入现有 Markdown
+              </button>
+            </div>
+          </section>
         ) : null}
 
         <ArticleEditor
