@@ -13,10 +13,10 @@ import {
   getRelatedArticlesFromSource,
   mergeArticles,
 } from "./content-source";
+import { loadMarkdownArticles } from "./markdown-articles";
 import type { Article } from "./qdaily-data";
 
 describe("content source", () => {
-  const markdownArticleCount = 3;
   const previousUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const previousAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -32,6 +32,7 @@ describe("content source", () => {
 
   it("falls back to the local editorial seed when Supabase is not configured", async () => {
     const home = await getHomePageData();
+    const markdownArticleCount = (await loadMarkdownArticles()).length;
 
     expect(home.spotlightStory.slug).toBe(spotlightStory.slug);
     expect(home.sideFeatures).toHaveLength(sideFeatures.length);
@@ -55,6 +56,7 @@ describe("content source", () => {
   it("provides search listings and static params from the same source", async () => {
     const searchArticles = await getArticlesForSearchFromSource();
     const slugs = await getAllArticleSlugsFromSource();
+    const markdownArticleCount = (await loadMarkdownArticles()).length;
 
     expect(searchArticles).toHaveLength(articles.length + markdownArticleCount);
     expect(slugs).toContain("rebuild-a-newsroom-wall");

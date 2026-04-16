@@ -1,6 +1,6 @@
 import { buildArticleMutation, type ArticleMutationInput, type ArticleStatus } from "./article-management";
 import { buildMarkdownImportPayload, deserializeStoredArticleBlock, deserializeStoredHeroImage } from "./markdown-import";
-import { loadMarkdownArticleSources } from "./markdown-articles";
+import { loadMarkdownArticleSources, parseMarkdownArticle } from "./markdown-articles";
 import { getSupabaseServerClient } from "./supabase/server";
 
 type Option = {
@@ -587,6 +587,26 @@ export async function importMarkdownAdminArticle(
 
   return {
     slug: payload.article.slug,
+  };
+}
+
+export async function previewMarkdownAdminArticle(
+  input: {
+    markdown: string;
+    authorSlug: string;
+  },
+  accessToken?: string,
+) {
+  const context = await requireAdminContext(accessToken);
+  const parsedArticle = parseMarkdownArticle(input.markdown);
+  const options = await loadEditorOptions(context.supabase);
+  const selectedAuthor = options.authors.find((author) => author.slug === input.authorSlug);
+
+  return {
+    article: {
+      ...parsedArticle,
+      author: selectedAuthor?.name ?? parsedArticle.author,
+    },
   };
 }
 

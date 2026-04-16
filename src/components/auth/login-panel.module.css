@@ -28,6 +28,33 @@
   line-height: 1.74;
 }
 
+.modeSwitch {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: #faf6ef;
+}
+
+.modeButton,
+.modeButtonActive {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ink-muted);
+}
+
+.modeButtonActive {
+  background: var(--brand-yellow);
+  color: #111;
+  font-weight: 600;
+}
+
 .form {
   display: grid;
   gap: 18px;
