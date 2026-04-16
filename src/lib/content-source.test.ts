@@ -11,7 +11,9 @@ import {
   getArticlesForSearchFromSource,
   getHomePageData,
   getRelatedArticlesFromSource,
+  mergeArticles,
 } from "./content-source";
+import type { Article } from "./qdaily-data";
 
 describe("content source", () => {
   const markdownArticleCount = 3;
@@ -72,5 +74,34 @@ describe("content source", () => {
     expect(article?.longformBlocks?.some((block) => block.type === "image")).toBe(true);
     expect(searchArticles.some((item) => item.slug === "zhangxue-profile-editorial-reillustrated")).toBe(true);
     expect(slugs).toContain("zhangxue-profile-editorial-reillustrated");
+  });
+
+  it("prefers Supabase articles over repository markdown when the same slug exists in both sources", () => {
+    const supabaseArticle = {
+      ...articles[0],
+      slug: "shared-slug",
+      title: "Supabase version",
+      source: "supabase",
+      heroImage: {
+        src: "https://cdn.example.com/articles/shared-slug/hero.jpg",
+        alt: "Supabase hero",
+      },
+    } satisfies Article;
+    const markdownArticle = {
+      ...articles[1],
+      slug: "shared-slug",
+      title: "Markdown version",
+      source: "markdown",
+      heroImage: {
+        src: "/editorial/shared/hero.jpg",
+        alt: "Markdown hero",
+      },
+    } satisfies Article;
+
+    const merged = mergeArticles([supabaseArticle], [markdownArticle]);
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]?.title).toBe("Supabase version");
+    expect(merged[0]?.heroImage?.src).toBe("https://cdn.example.com/articles/shared-slug/hero.jpg");
   });
 });

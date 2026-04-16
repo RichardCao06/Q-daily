@@ -18,12 +18,13 @@ type ArticleEditorProps = {
   tags: Option[];
   initialValue?: ArticleMutationInput;
   onSave: (value: ArticleMutationInput) => void;
+  onUploadInlineImage?: (file: File, alt: string, slug?: string) => Promise<{ url: string; alt: string }>;
   onUnpublish?: () => void;
 };
 
 const defaultGradient = "linear-gradient(135deg, #111 0%, #333 100%)";
 
-export function ArticleEditor({ mode, categories, authors, tags, initialValue, onSave, onUnpublish }: ArticleEditorProps) {
+export function ArticleEditor({ mode, categories, authors, tags, initialValue, onSave, onUploadInlineImage, onUnpublish }: ArticleEditorProps) {
   const [form, setForm] = useState<ArticleMutationInput>(
     initialValue ?? {
       title: "",
@@ -33,13 +34,20 @@ export function ArticleEditor({ mode, categories, authors, tags, initialValue, o
       categorySlug: categories[0]?.slug ?? "",
       readingTime: "6 分钟",
       coverAlt: "",
+      heroImageUrl: "",
+      heroImageCaption: "",
       palette: defaultGradient,
       tagSlugs: [],
-      bodyInput: "",
+      sourceMarkdown: "",
       status: "draft",
       publishedAt: "",
     },
   );
+  const [inlineImageAlt, setInlineImageAlt] = useState("");
+  const [inlineImageFile, setInlineImageFile] = useState<File | null>(null);
+  const [inlineImageInputKey, setInlineImageInputKey] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploadingInlineImage, setIsUploadingInlineImage] = useState(false);
 
   function updateField<Key extends keyof ArticleMutationInput>(key: Key, value: ArticleMutationInput[Key]) {
     setForm((current) => ({
@@ -62,6 +70,34 @@ export function ArticleEditor({ mode, categories, authors, tags, initialValue, o
       ...form,
       status,
     });
+  }
+
+  async function handleInlineImageUpload() {
+    if (!onUploadInlineImage || !inlineImageFile) {
+      return;
+    }
+
+    try {
+      setUploadError(null);
+      setIsUploadingInlineImage(true);
+      const result = form.slug.trim()
+        ? await onUploadInlineImage(inlineImageFile, inlineImageAlt, form.slug.trim())
+        : await onUploadInlineImage(inlineImageFile, inlineImageAlt);
+      const altText = result.alt.trim() || inlineImageAlt.trim() || "配图";
+      const imageMarkdown = `![${altText}](${result.url})`;
+
+      updateField(
+        "sourceMarkdown",
+        form.sourceMarkdown.trim() ? `${form.sourceMarkdown.replace(/\s+$/, "")}\n\n${imageMarkdown}` : imageMarkdown,
+      );
+      setInlineImageAlt("");
+      setInlineImageFile(null);
+      setInlineImageInputKey((current) => current + 1);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "正文图片上传失败");
+    } finally {
+      setIsUploadingInlineImage(false);
+    }
   }
 
   return (
@@ -121,6 +157,16 @@ export function ArticleEditor({ mode, categories, authors, tags, initialValue, o
           <input id="coverAlt" value={form.coverAlt} onChange={(event) => updateField("coverAlt", event.target.value)} />
         </div>
 
+        <div className={`${styles.field} ${styles.spanFull}`}>
+          <label htmlFor="heroImageUrl">头图地址</label>
+          <input id="heroImageUrl" value={form.heroImageUrl} onChange={(event) => updateField("heroImageUrl", event.target.value)} />
+        </div>
+
+        <div className={`${styles.field} ${styles.spanFull}`}>
+          <label htmlFor="heroImageCaption">头图图注</label>
+          <textarea id="heroImageCaption" rows={2} value={form.heroImageCaption} onChange={(event) => updateField("heroImageCaption", event.target.value)} />
+        </div>
+
         <div className={styles.field}>
           <label htmlFor="palette">色板</label>
           <input id="palette" value={form.palette} onChange={(event) => updateField("palette", event.target.value)} />
@@ -144,10 +190,35 @@ export function ArticleEditor({ mode, categories, authors, tags, initialValue, o
         </fieldset>
 
         <div className={`${styles.field} ${styles.spanFull}`}>
-          <label htmlFor="body">正文</label>
-          <textarea id="body" rows={12} value={form.bodyInput} onChange={(event) => updateField("bodyInput", event.target.value)} />
+          <label htmlFor="body">Markdown 正文</label>
+          <textarea id="body" rows={14} value={form.sourceMarkdown} onChange={(event) => updateField("sourceMarkdown", event.target.value)} />
+        </div>
+
+        <div className={`${styles.field} ${styles.spanFull}`}>
+          <label htmlFor="inlineImageAlt">正文图片 Alt</label>
+          <input id="inlineImageAlt" value={inlineImageAlt} onChange={(event) => setInlineImageAlt(event.target.value)} />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="inlineImageFile">上传正文图片</label>
+          <input
+            key={inlineImageInputKey}
+            id="inlineImageFile"
+            type="file"
+            accept="image/*"
+            onChange={(event) => setInlineImageFile(event.target.files?.[0] ?? null)}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="inlineImageButton">插入正文图片</label>
+          <button id="inlineImageButton" type="button" className={styles.secondary} onClick={() => void handleInlineImageUpload()} disabled={!onUploadInlineImage || !inlineImageFile || isUploadingInlineImage}>
+            {isUploadingInlineImage ? "上传中…" : "插入正文图片"}
+          </button>
         </div>
       </div>
+
+      {uploadError ? <p className={styles.error}>{uploadError}</p> : null}
 
       <div className={styles.actions}>
         <button type="button" className={styles.primary} onClick={() => submit("draft")}>

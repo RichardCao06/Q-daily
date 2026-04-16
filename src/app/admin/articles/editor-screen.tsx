@@ -111,6 +111,51 @@ export function AdminArticleEditorScreen({ slug }: AdminArticleEditorScreenProps
     });
   }
 
+  async function handleUploadInlineImage(file: File, alt: string, currentSlug?: string) {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      throw new Error("Supabase 未配置");
+    }
+
+    const resolvedSlug = currentSlug?.trim();
+    if (!resolvedSlug) {
+      throw new Error("请先填写文章 slug，再上传图片");
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error("请先登录管理员账号");
+    }
+
+    const formData = new FormData();
+    formData.set("slug", resolvedSlug);
+    formData.set("kind", "inline");
+    formData.set("alt", alt);
+    formData.set("file", file);
+
+    const response = await fetch("/api/admin/articles/media", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: formData,
+    });
+
+    const payload = (await response.json()) as { url?: string; alt?: string; error?: string };
+
+    if (!response.ok || !payload.url) {
+      throw new Error(payload.error ?? "图片上传失败");
+    }
+
+    return {
+      url: payload.url,
+      alt: payload.alt ?? alt,
+    };
+  }
+
   function handleUnpublish() {
     if (!slug) {
       return;
@@ -183,6 +228,7 @@ export function AdminArticleEditorScreen({ slug }: AdminArticleEditorScreenProps
           tags={state.tags}
           initialValue={state.article ?? undefined}
           onSave={handleSave}
+          onUploadInlineImage={handleUploadInlineImage}
           onUnpublish={slug ? handleUnpublish : undefined}
         />
 

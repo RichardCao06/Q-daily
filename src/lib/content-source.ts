@@ -179,7 +179,7 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
         supabase.from("tags").select("slug,name,description"),
         supabase
           .from("articles")
-          .select("slug,legacy_id,title,excerpt,published_at,comments_count,likes_count,palette,author_slug,reading_time,cover_alt,category_slug,status")
+          .select("slug,legacy_id,title,excerpt,published_at,comments_count,likes_count,palette,author_slug,reading_time,cover_alt,category_slug,status,hero_image_url,hero_image_caption")
           .eq("status", "published"),
         supabase.from("article_blocks").select("article_slug,position,kind,content").order("position", { ascending: true }),
         supabase.from("article_tags").select("article_slug,tag_slug"),
@@ -282,7 +282,13 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
           body: resolvedBlocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
           category,
           tags: resolvedTags,
-          heroImage: articleHeroImagesBySlug.get(article.slug),
+          heroImage: article.hero_image_url
+            ? {
+                src: article.hero_image_url,
+                alt: article.cover_alt,
+                caption: article.hero_image_caption ?? undefined,
+              }
+            : articleHeroImagesBySlug.get(article.slug),
           longformBlocks: resolvedBlocks.length > 0 ? resolvedBlocks : undefined,
         } satisfies Article];
       });
@@ -305,14 +311,14 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
   }
 });
 
-function mergeArticles(baseArticles: Article[], markdownArticles: Article[]) {
+export function mergeArticles(baseArticles: Article[], markdownArticles: Article[]) {
   const articlesBySlug = new Map<string, Article>();
 
-  for (const article of baseArticles) {
+  for (const article of markdownArticles) {
     articlesBySlug.set(article.slug, article);
   }
 
-  for (const article of markdownArticles) {
+  for (const article of baseArticles) {
     articlesBySlug.set(article.slug, article);
   }
 

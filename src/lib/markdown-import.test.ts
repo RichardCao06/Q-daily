@@ -34,12 +34,14 @@ heroCaption: 图注：何琼与张雪的合影。
     expect(payload.article.authorSlug).toBe("richard-cao");
     expect(payload.article.categorySlug).toBe("culture");
     expect(payload.article.status).toBe("published");
+    expect(payload.article.sourceMarkdown).toContain("她是张雪的母亲。");
+    expect(payload.article.heroImageUrl).toBe("/editorial/heqiong-profile/hero-heqiong-1.jpg");
+    expect(payload.article.heroImageCaption).toBe("图注：何琼与张雪的合影。");
     expect(payload.tagSlugs).toEqual(["longform", "culture-shift", "newsroom"]);
     expect(payload.blocks).toEqual([
-      expect.objectContaining({ position: 1, kind: "hero_image" }),
-      expect.objectContaining({ position: 2, kind: "heading" }),
-      expect.objectContaining({ position: 3, kind: "paragraph", content: "她是张雪的母亲。" }),
-      expect.objectContaining({ position: 4, kind: "image" }),
+      expect.objectContaining({ position: 1, kind: "heading" }),
+      expect.objectContaining({ position: 2, kind: "paragraph", content: "她是张雪的母亲。" }),
+      expect.objectContaining({ position: 3, kind: "image" }),
     ]);
   });
 

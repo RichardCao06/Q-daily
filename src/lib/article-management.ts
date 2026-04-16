@@ -1,3 +1,6 @@
+import type { ArticleLongformBlock } from "./qdaily-data";
+import { parseMarkdownBody } from "./markdown-articles";
+
 export type ArticleStatus = "draft" | "published";
 
 export type ArticleMutationInput = {
@@ -8,9 +11,11 @@ export type ArticleMutationInput = {
   categorySlug: string;
   readingTime: string;
   coverAlt: string;
+  heroImageUrl: string;
+  heroImageCaption: string;
   palette: string;
   tagSlugs: string[];
-  bodyInput: string;
+  sourceMarkdown: string;
   status: ArticleStatus;
   publishedAt: string;
 };
@@ -24,12 +29,15 @@ export type ArticleMutationPayload = {
     categorySlug: string;
     readingTime: string;
     coverAlt: string;
+    heroImageUrl: string;
+    heroImageCaption: string;
+    sourceMarkdown: string;
     palette: string;
     status: ArticleStatus;
     publishedAt: string | null;
   };
   tagSlugs: string[];
-  body: string[];
+  blocks: ArticleLongformBlock[];
 };
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -57,8 +65,11 @@ export function buildArticleMutation(input: ArticleMutationInput): ArticleMutati
   const categorySlug = input.categorySlug.trim();
   const readingTime = input.readingTime.trim();
   const coverAlt = input.coverAlt.trim();
+  const heroImageUrl = input.heroImageUrl.trim();
+  const heroImageCaption = input.heroImageCaption.trim();
+  const sourceMarkdown = input.sourceMarkdown.trim();
   const palette = input.palette.trim();
-  const body = splitArticleBody(input.bodyInput);
+  const blocks = parseMarkdownBody(sourceMarkdown);
   const publishedAt =
     input.status === "published" ? (input.publishedAt.trim() ? new Date(input.publishedAt).toISOString() : new Date().toISOString()) : null;
 
@@ -78,7 +89,7 @@ export function buildArticleMutation(input: ArticleMutationInput): ArticleMutati
     throw new Error("作者和分类不能为空");
   }
 
-  if (body.length === 0) {
+  if (blocks.length === 0) {
     throw new Error("正文至少需要一个段落");
   }
 
@@ -91,11 +102,14 @@ export function buildArticleMutation(input: ArticleMutationInput): ArticleMutati
       categorySlug,
       readingTime,
       coverAlt,
+      heroImageUrl,
+      heroImageCaption,
+      sourceMarkdown,
       palette,
       status: input.status,
       publishedAt,
     },
     tagSlugs: Array.from(new Set(input.tagSlugs)),
-    body,
+    blocks,
   };
 }

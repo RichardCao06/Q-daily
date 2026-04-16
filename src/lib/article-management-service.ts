@@ -1,5 +1,6 @@
-import { buildArticleMutation, joinArticleBody, type ArticleMutationInput, type ArticleStatus } from "./article-management";
-import { buildMarkdownImportPayload } from "./markdown-import";
+import { buildArticleMutation, type ArticleMutationInput, type ArticleStatus } from "./article-management";
+import { buildMarkdownImportPayload, deserializeStoredArticleBlock, deserializeStoredHeroImage } from "./markdown-import";
+import { loadMarkdownArticleSources } from "./markdown-articles";
 import { getSupabaseServerClient } from "./supabase/server";
 
 type Option = {
@@ -43,22 +44,6 @@ type AdminContext =
   | {
       configured: true;
       isAdmin: true;
-      userId: string;
-      supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>;
-    };
-
-type AuthenticatedWriteContext =
-  | {
-      configured: false;
-      authenticated: false;
-    }
-  | {
-      configured: true;
-      authenticated: false;
-    }
-  | {
-      configured: true;
-      authenticated: true;
       userId: string;
       supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>;
     };
@@ -111,54 +96,67 @@ async function getAdminContext(accessToken?: string): Promise<AdminContext> {
   };
 }
 
-async function getAuthenticatedWriteContext(accessToken?: string): Promise<AuthenticatedWriteContext> {
-  const supabase = getSupabaseServerClient(accessToken ? { accessToken } : {});
-
-  if (!supabase) {
-    return {
-      configured: false,
-      authenticated: false,
-    };
-  }
-
-  if (!accessToken) {
-    return {
-      configured: true,
-      authenticated: false,
-    };
-  }
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser(accessToken);
-
-  if (!user) {
-    return {
-      configured: true,
-      authenticated: false,
-    };
-  }
-
-  return {
-    configured: true,
-    authenticated: true,
-    userId: user.id,
-    supabase,
-  };
-}
-
-async function requireAuthenticatedWriteContext(accessToken?: string) {
-  const context = await getAuthenticatedWriteContext(accessToken);
-
+async function requireAdminContext(accessToken?: string) {
+  const context = await getAdminContext(accessToken);
   if (!context.configured) {
     throw new Error("Supabase unavailable");
   }
 
-  if (!context.authenticated) {
+  if (!context.isAdmin) {
     throw new Error("Forbidden");
   }
 
   return context;
+}
+
+function serializeBlocksToMarkdown(
+  rows: Array<{ kind: string; content: string }>,
+  heroImage?: { src: string; alt: string; caption?: string } | null,
+) {
+  const sections: string[] = [];
+
+  if (heroImage?.src) {
+    sections.push(`![${heroImage.alt}](${heroImage.src})`);
+    if (heroImage.caption) {
+      sections.push(`*${heroImage.caption}*`);
+    }
+  }
+
+  for (const row of rows) {
+    const decoded = deserializeStoredArticleBlock({
+      kind: row.kind,
+      content: row.content,
+    });
+
+    if (!decoded) {
+      continue;
+    }
+
+    if (decoded.type === "paragraph") {
+      sections.push(decoded.content);
+      continue;
+    }
+
+    if (decoded.type === "heading") {
+      sections.push(`${"#".repeat(decoded.level)} ${decoded.content}`);
+      continue;
+    }
+
+    sections.push(`![${decoded.alt}](${decoded.src})`);
+    if (decoded.caption) {
+      sections.push(`*${decoded.caption}*`);
+    }
+  }
+
+  return sections.join("\n\n").trim();
+}
+
+function sanitizeFileName(fileName: string) {
+  return fileName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9.\-_]+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 async function persistArticleRecords(
@@ -176,6 +174,9 @@ async function persistArticleRecords(
       authorSlug: string;
       readingTime: string;
       coverAlt: string;
+      heroImageUrl: string;
+      heroImageCaption: string;
+      sourceMarkdown: string;
       categorySlug: string;
     };
     tagSlugs: string[];
@@ -199,6 +200,9 @@ async function persistArticleRecords(
     author_slug: payload.article.authorSlug,
     reading_time: payload.article.readingTime,
     cover_alt: payload.article.coverAlt,
+    hero_image_url: payload.article.heroImageUrl || null,
+    hero_image_caption: payload.article.heroImageCaption || null,
+    source_markdown: payload.article.sourceMarkdown,
     category_slug: payload.article.categorySlug,
     updated_by: userId,
   });
@@ -224,6 +228,57 @@ async function persistArticleRecords(
     const tagsResult = await db.from("article_tags").insert(
       payload.tagSlugs.map((tagSlug) => ({
         article_slug: payload.article.slug,
+        tag_slug: tagSlug,
+      })),
+    );
+
+    if (tagsResult.error) {
+      throw new Error(tagsResult.error.message);
+    }
+  }
+}
+
+async function replaceArticleRelations(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+  slug: string,
+  payload: {
+    tagSlugs: string[];
+    blocks: Array<{
+      position: number;
+      kind: string;
+      content: string;
+    }>;
+  },
+) {
+  const [deleteBlocksResult, deleteTagsResult] = await Promise.all([
+    db.from("article_blocks").delete().eq("article_slug", slug),
+    db.from("article_tags").delete().eq("article_slug", slug),
+  ]);
+
+  if (deleteBlocksResult.error || deleteTagsResult.error) {
+    throw new Error(deleteBlocksResult.error?.message ?? deleteTagsResult.error?.message ?? "Unable to reset article relations");
+  }
+
+  if (payload.blocks.length > 0) {
+    const blocksResult = await db.from("article_blocks").insert(
+      payload.blocks.map((block) => ({
+        article_slug: slug,
+        position: block.position,
+        content: block.content,
+        kind: block.kind,
+      })),
+    );
+
+    if (blocksResult.error) {
+      throw new Error(blocksResult.error.message);
+    }
+  }
+
+  if (payload.tagSlugs.length > 0) {
+    const tagsResult = await db.from("article_tags").insert(
+      payload.tagSlugs.map((tagSlug) => ({
+        article_slug: slug,
         tag_slug: tagSlug,
       })),
     );
@@ -361,10 +416,10 @@ export async function loadAdminArticleEditor(slug: string | null, accessToken?: 
   const [articleResult, blocksResult, tagsResult] = await Promise.all([
     db
       .from("articles")
-      .select("slug,title,excerpt,status,published_at,author_slug,category_slug,reading_time,cover_alt,palette")
+      .select("slug,title,excerpt,status,published_at,author_slug,category_slug,reading_time,cover_alt,palette,source_markdown,hero_image_url,hero_image_caption")
       .eq("slug", slug)
       .maybeSingle(),
-    db.from("article_blocks").select("position,content").eq("article_slug", slug).order("position", { ascending: true }),
+    db.from("article_blocks").select("position,kind,content").eq("article_slug", slug).order("position", { ascending: true }),
     db.from("article_tags").select("tag_slug").eq("article_slug", slug),
   ]);
 
@@ -383,7 +438,28 @@ export async function loadAdminArticleEditor(slug: string | null, accessToken?: 
     reading_time: string;
     cover_alt: string;
     palette: string;
+    source_markdown: string;
+    hero_image_url: string | null;
+    hero_image_caption: string | null;
   };
+
+  const blockRows = ((blocksResult.data ?? []) as Array<{ kind: string; content: string }>);
+  const legacyHeroRow = blockRows.find((block) => block.kind === "hero_image");
+  const fallbackHero = legacyHeroRow
+    ? deserializeStoredHeroImage(legacyHeroRow)
+    : null;
+  const sourceMarkdown =
+    article.source_markdown?.trim() ||
+    serializeBlocksToMarkdown(
+      blockRows.filter((block) => block.kind !== "hero_image"),
+      article.hero_image_url
+        ? {
+            src: article.hero_image_url,
+            alt: article.cover_alt,
+            caption: article.hero_image_caption ?? undefined,
+          }
+        : fallbackHero,
+    );
 
   return {
     configured: true,
@@ -397,9 +473,11 @@ export async function loadAdminArticleEditor(slug: string | null, accessToken?: 
       categorySlug: article.category_slug,
       readingTime: article.reading_time,
       coverAlt: article.cover_alt,
+      heroImageUrl: article.hero_image_url ?? fallbackHero?.src ?? "",
+      heroImageCaption: article.hero_image_caption ?? fallbackHero?.caption ?? "",
       palette: article.palette,
       tagSlugs: ((tagsResult.data ?? []) as Array<{ tag_slug: string }>).map((tag) => tag.tag_slug),
-      bodyInput: joinArticleBody(((blocksResult.data ?? []) as Array<{ content: string }>).map((block) => block.content)),
+      sourceMarkdown,
       status: article.status,
       publishedAt: article.published_at ?? "",
     },
@@ -407,7 +485,7 @@ export async function loadAdminArticleEditor(slug: string | null, accessToken?: 
 }
 
 export async function createAdminArticle(input: ArticleMutationInput, accessToken?: string) {
-  const context = await requireAuthenticatedWriteContext(accessToken);
+  const context = await requireAdminContext(accessToken);
   const payload = buildArticleMutation(input);
 
   // Temporary escape hatch until the Supabase types are regenerated for the new tables.
@@ -417,11 +495,36 @@ export async function createAdminArticle(input: ArticleMutationInput, accessToke
   await persistArticleRecords(db, context.userId, {
     article: payload.article,
     tagSlugs: payload.tagSlugs,
-    blocks: payload.body.map((paragraph, index) => ({
-      position: index + 1,
-      content: paragraph,
-      kind: "paragraph",
-    })),
+    blocks: payload.blocks.map((block, index) => {
+      if (block.type === "paragraph") {
+        return {
+          position: index + 1,
+          content: block.content,
+          kind: "paragraph",
+        };
+      }
+
+      if (block.type === "heading") {
+        return {
+          position: index + 1,
+          kind: "heading",
+          content: JSON.stringify({
+            level: block.level,
+            content: block.content,
+          }),
+        };
+      }
+
+      return {
+        position: index + 1,
+        kind: "image",
+        content: JSON.stringify({
+          src: block.src,
+          alt: block.alt,
+          caption: block.caption,
+        }),
+      };
+    }),
   });
 
   return {
@@ -437,7 +540,7 @@ export async function importMarkdownAdminArticle(
   },
   accessToken?: string,
 ) {
-  const context = await requireAuthenticatedWriteContext(accessToken);
+  const context = await requireAdminContext(accessToken);
   const payload = buildMarkdownImportPayload(input.markdown, {
     authorSlug: input.authorSlug,
     status: input.status,
@@ -447,15 +550,75 @@ export async function importMarkdownAdminArticle(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = context.supabase as any;
 
-  await persistArticleRecords(db, context.userId, payload);
+  const existingArticle = await db.from("articles").select("slug").eq("slug", payload.article.slug).maybeSingle();
+
+  if (existingArticle.error) {
+    throw new Error(existingArticle.error.message);
+  }
+
+  if (existingArticle.data?.slug) {
+    const articleResult = await db
+      .from("articles")
+      .update({
+        title: payload.article.title,
+        excerpt: payload.article.excerpt,
+        status: payload.article.status,
+        published_at: payload.article.publishedAt,
+        palette: payload.article.palette,
+        author_slug: payload.article.authorSlug,
+        reading_time: payload.article.readingTime,
+        cover_alt: payload.article.coverAlt,
+        hero_image_url: payload.article.heroImageUrl || null,
+        hero_image_caption: payload.article.heroImageCaption || null,
+        source_markdown: payload.article.sourceMarkdown,
+        category_slug: payload.article.categorySlug,
+        updated_by: context.userId,
+      })
+      .eq("slug", payload.article.slug);
+
+    if (articleResult.error) {
+      throw new Error(articleResult.error.message);
+    }
+
+    await replaceArticleRelations(db, payload.article.slug, payload);
+  } else {
+    await persistArticleRecords(db, context.userId, payload);
+  }
 
   return {
     slug: payload.article.slug,
   };
 }
 
+export async function syncRepositoryMarkdownArticlesToSupabase(
+  input: {
+    authorSlug: string;
+    status?: ArticleStatus;
+  },
+  accessToken?: string,
+) {
+  const sources = await loadMarkdownArticleSources();
+  const imported: string[] = [];
+
+  for (const { source } of sources) {
+    const result = await importMarkdownAdminArticle(
+      {
+        markdown: source,
+        authorSlug: input.authorSlug,
+        status: input.status,
+      },
+      accessToken,
+    );
+    imported.push(result.slug);
+  }
+
+  return {
+    imported,
+  };
+}
+
 export async function updateAdminArticle(slug: string, input: ArticleMutationInput, accessToken?: string) {
-  const context = await requireAuthenticatedWriteContext(accessToken);
+  const context = await requireAdminContext(accessToken);
   const payload = buildArticleMutation(input);
 
   if (payload.article.slug !== slug) {
@@ -477,6 +640,9 @@ export async function updateAdminArticle(slug: string, input: ArticleMutationInp
       author_slug: payload.article.authorSlug,
       reading_time: payload.article.readingTime,
       cover_alt: payload.article.coverAlt,
+      hero_image_url: payload.article.heroImageUrl || null,
+      hero_image_caption: payload.article.heroImageCaption || null,
+      source_markdown: payload.article.sourceMarkdown,
       category_slug: payload.article.categorySlug,
       updated_by: context.userId,
     })
@@ -486,40 +652,39 @@ export async function updateAdminArticle(slug: string, input: ArticleMutationInp
     throw new Error(articleResult.error.message);
   }
 
-  const [deleteBlocksResult, deleteTagsResult] = await Promise.all([
-    db.from("article_blocks").delete().eq("article_slug", slug),
-    db.from("article_tags").delete().eq("article_slug", slug),
-  ]);
+  await replaceArticleRelations(db, slug, {
+    tagSlugs: payload.tagSlugs,
+    blocks: payload.blocks.map((block, index) => {
+      if (block.type === "paragraph") {
+        return {
+          position: index + 1,
+          content: block.content,
+          kind: "paragraph",
+        };
+      }
 
-  if (deleteBlocksResult.error || deleteTagsResult.error) {
-    throw new Error(deleteBlocksResult.error?.message ?? deleteTagsResult.error?.message ?? "Unable to reset article relations");
-  }
+      if (block.type === "heading") {
+        return {
+          position: index + 1,
+          kind: "heading",
+          content: JSON.stringify({
+            level: block.level,
+            content: block.content,
+          }),
+        };
+      }
 
-  const blocksResult = await db.from("article_blocks").insert(
-    payload.body.map((paragraph, index) => ({
-      article_slug: slug,
-      position: index + 1,
-      content: paragraph,
-      kind: "paragraph",
-    })),
-  );
-
-  if (blocksResult.error) {
-    throw new Error(blocksResult.error.message);
-  }
-
-  if (payload.tagSlugs.length > 0) {
-    const tagsResult = await db.from("article_tags").insert(
-      payload.tagSlugs.map((tagSlug) => ({
-        article_slug: slug,
-        tag_slug: tagSlug,
-      })),
-    );
-
-    if (tagsResult.error) {
-      throw new Error(tagsResult.error.message);
-    }
-  }
+      return {
+        position: index + 1,
+        kind: "image",
+        content: JSON.stringify({
+          src: block.src,
+          alt: block.alt,
+          caption: block.caption,
+        }),
+      };
+    }),
+  });
 
   return {
     slug,
@@ -527,7 +692,7 @@ export async function updateAdminArticle(slug: string, input: ArticleMutationInp
 }
 
 export async function setAdminArticleStatus(slug: string, status: ArticleStatus, accessToken?: string) {
-  const context = await requireAuthenticatedWriteContext(accessToken);
+  const context = await requireAdminContext(accessToken);
 
   // Temporary escape hatch until the Supabase types are regenerated for the new tables.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -546,4 +711,47 @@ export async function setAdminArticleStatus(slug: string, status: ArticleStatus,
   if (result.error) {
     throw new Error(result.error.message);
   }
+}
+
+export async function uploadAdminArticleMedia(
+  input: {
+    slug: string;
+    kind: "hero" | "inline";
+    alt?: string;
+    file: File;
+  },
+  accessToken?: string,
+) {
+  const context = await requireAdminContext(accessToken);
+  const slug = input.slug.trim();
+
+  if (!slug) {
+    throw new Error("Slug is required");
+  }
+
+  if (!input.file) {
+    throw new Error("Image file is required");
+  }
+
+  const safeFileName = sanitizeFileName(input.file.name || "upload");
+  const objectPath = `articles/${slug}/${input.kind}/${Date.now()}-${safeFileName}`;
+
+  const { error } = await context.supabase.storage.from("article-media").upload(objectPath, input.file, {
+    upsert: false,
+    contentType: input.file.type || undefined,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const {
+    data: { publicUrl },
+  } = context.supabase.storage.from("article-media").getPublicUrl(objectPath);
+
+  return {
+    url: publicUrl,
+    path: objectPath,
+    alt: input.alt?.trim() || input.file.name,
+  };
 }

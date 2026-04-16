@@ -26,6 +26,9 @@ type MarkdownImportPayload = {
     categorySlug: string;
     readingTime: string;
     coverAlt: string;
+    heroImageUrl: string;
+    heroImageCaption: string;
+    sourceMarkdown: string;
     palette: string;
     status: "draft" | "published";
     publishedAt: string | null;
@@ -184,19 +187,6 @@ export function buildMarkdownImportPayload(source: string, options: MarkdownImpo
     };
   });
 
-  const blocks = article.heroImage
-    ? [
-        {
-          position: 1,
-          ...serializeHeroImage(article.heroImage),
-        },
-        ...storedBlocks.map((block) => ({
-          ...block,
-          position: block.position + 1,
-        })),
-      ]
-    : storedBlocks;
-
   return {
     article: {
       slug: article.slug,
@@ -206,11 +196,14 @@ export function buildMarkdownImportPayload(source: string, options: MarkdownImpo
       categorySlug: article.category.slug,
       readingTime: article.readingTime,
       coverAlt: article.coverAlt,
+      heroImageUrl: article.heroImage?.src ?? "",
+      heroImageCaption: article.heroImage?.caption ?? "",
+      sourceMarkdown: source,
       palette: article.palette,
       status,
       publishedAt,
     },
     tagSlugs: article.tags.map((tag) => tag.slug),
-    blocks,
+    blocks: storedBlocks,
   };
 }

@@ -113,6 +113,15 @@
   color: #8d3f1d;
 }
 
+.error {
+  margin: 16px 0 0;
+  border: 1px solid #d07a52;
+  border-radius: 14px;
+  background: #fff4ed;
+  color: #8d3f1d;
+  padding: 12px 14px;
+}
+
 @media (max-width: 860px) {
   .grid {
     grid-template-columns: 1fr;

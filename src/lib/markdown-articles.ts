@@ -50,7 +50,7 @@ function parseCaption(line: string) {
   return captionMatch ? captionMatch[1]?.trim() ?? "" : null;
 }
 
-function parseBlocks(body: string) {
+export function parseMarkdownBody(body: string) {
   const blocks: ArticleLongformBlock[] = [];
   const paragraphBuffer: string[] = [];
   const lines = body.split("\n");
@@ -150,7 +150,7 @@ export function parseMarkdownArticle(source: string): Article {
     return tag;
   });
 
-  const blocks = parseBlocks(body);
+  const blocks = parseMarkdownBody(body);
 
   return {
     id: requireField(frontmatter, "slug"),
@@ -180,17 +180,22 @@ export function parseMarkdownArticle(source: string): Article {
 
 export async function loadMarkdownArticles(directory = defaultDirectory) {
   try {
-    const files = await readdir(directory);
-    const markdownFiles = files.filter((file) => file.endsWith(".md"));
-    const articles = await Promise.all(
-      markdownFiles.map(async (file) => {
-        const source = await readFile(path.join(directory, file), "utf8");
-        return parseMarkdownArticle(source);
-      }),
-    );
+    const articles = await Promise.all((await loadMarkdownArticleSources(directory)).map(async ({ source }) => parseMarkdownArticle(source)));
 
     return articles;
   } catch {
     return [] as Article[];
   }
+}
+
+export async function loadMarkdownArticleSources(directory = defaultDirectory) {
+  const files = await readdir(directory);
+  const markdownFiles = files.filter((file) => file.endsWith(".md"));
+
+  return Promise.all(
+    markdownFiles.map(async (file) => ({
+      file,
+      source: await readFile(path.join(directory, file), "utf8"),
+    })),
+  );
 }

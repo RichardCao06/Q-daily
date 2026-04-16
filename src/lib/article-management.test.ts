@@ -26,9 +26,11 @@ describe("article management helpers", () => {
       categorySlug: "business",
       readingTime: "6 分钟",
       coverAlt: "封面说明",
+      heroImageUrl: "https://cdn.example.com/articles/new-editorial-story/hero.jpg",
+      heroImageCaption: "图注：新的头图。",
       palette: "linear-gradient(135deg, #111 0%, #333 100%)",
       tagSlugs: ["newsroom", "product-thinking"],
-      bodyInput: "第一段。\n\n第二段。",
+      sourceMarkdown: "## 第一节\n\n第一段。\n\n![配图](https://cdn.example.com/articles/new-editorial-story/inline-1.jpg)\n\n*图注：配图说明。*",
       status: "draft",
       publishedAt: "",
     });
@@ -37,8 +39,20 @@ describe("article management helpers", () => {
     expect(payload.article.publishedAt).toBeNull();
     expect(payload.article.title).toBe("新文章标题");
     expect(payload.article.excerpt).toBe("一段摘要");
+    expect(payload.article.heroImageUrl).toBe("https://cdn.example.com/articles/new-editorial-story/hero.jpg");
+    expect(payload.article.heroImageCaption).toBe("图注：新的头图。");
+    expect(payload.article.sourceMarkdown).toContain("## 第一节");
     expect(payload.tagSlugs).toEqual(["newsroom", "product-thinking"]);
-    expect(payload.body).toEqual(["第一段。", "第二段。"]);
+    expect(payload.blocks).toEqual([
+      { type: "heading", level: 2, content: "第一节" },
+      { type: "paragraph", content: "第一段。" },
+      {
+        type: "image",
+        src: "https://cdn.example.com/articles/new-editorial-story/inline-1.jpg",
+        alt: "配图",
+        caption: "图注：配图说明。",
+      },
+    ]);
   });
 
   it("assigns the current time when publishing without an explicit publish timestamp", () => {
@@ -50,9 +64,11 @@ describe("article management helpers", () => {
       categorySlug: "culture",
       readingTime: "5 分钟",
       coverAlt: "封面",
+      heroImageUrl: "https://cdn.example.com/articles/published-editorial-story/hero.jpg",
+      heroImageCaption: "",
       palette: "linear-gradient(135deg, #222 0%, #555 100%)",
       tagSlugs: [],
-      bodyInput: "正文第一段。",
+      sourceMarkdown: "正文第一段。",
       status: "published",
       publishedAt: "",
     });
@@ -71,9 +87,11 @@ describe("article management helpers", () => {
         categorySlug: "culture",
         readingTime: "5 分钟",
         coverAlt: "封面",
+        heroImageUrl: "",
+        heroImageCaption: "",
         palette: "linear-gradient(135deg, #222 0%, #555 100%)",
         tagSlugs: [],
-        bodyInput: "正文第一段。",
+        sourceMarkdown: "正文第一段。",
         status: "draft",
         publishedAt: "",
       }),
@@ -88,9 +106,11 @@ describe("article management helpers", () => {
         categorySlug: "culture",
         readingTime: "5 分钟",
         coverAlt: "封面",
+        heroImageUrl: "",
+        heroImageCaption: "",
         palette: "linear-gradient(135deg, #222 0%, #555 100%)",
         tagSlugs: [],
-        bodyInput: "   ",
+        sourceMarkdown: "   ",
         status: "draft",
         publishedAt: "",
       }),
