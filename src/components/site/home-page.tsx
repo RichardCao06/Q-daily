@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 import {
+  defaultHomePageCopy,
   type HomePageData,
   type HomePageCopy,
 } from "@/lib/qdaily-data";
@@ -148,6 +149,7 @@ export function HomePage({ data }: HomePageProps) {
     data.featurePanels.length >= 2 &&
     data.sideFeatures.length >= 2 &&
     data.feedStories.length > 0;
+  const copy = data.copy ?? defaultHomePageCopy;
 
   return (
     <div className={styles.page} id="top">
@@ -203,16 +205,16 @@ export function HomePage({ data }: HomePageProps) {
             <section className={styles.heroBoard} aria-label="首页主编排">
               <div className={styles.heroMasthead}>
                 <section className={styles.curatorNote} aria-label="首页导语">
-                  <span>{data.copy.curatorNote.label}</span>
-                  <p>{data.copy.curatorNote.text}</p>
+                  <span>{copy.curatorNote.label}</span>
+                  <p>{copy.curatorNote.text}</p>
                 </section>
 
                 <div className={styles.curatorKicker}>
-                  <strong>{data.copy.curatorKicker.title}</strong>
-                  <p>{data.copy.curatorKicker.text}</p>
+                  <strong>{copy.curatorKicker.title}</strong>
+                  <p>{copy.curatorKicker.text}</p>
                   <div className={styles.editorMemo}>
-                    <span>{data.copy.editorMemo.label}</span>
-                    <p>{data.copy.editorMemo.text}</p>
+                    <span>{copy.editorMemo.label}</span>
+                    <p>{copy.editorMemo.text}</p>
                   </div>
                 </div>
               </div>
@@ -236,13 +238,13 @@ export function HomePage({ data }: HomePageProps) {
                 <div className={`${styles.heroSlot} ${styles.heroLatest}`.trim()}>
                   <LatestModule
                     latestStory={data.sideFeatures[0]}
-                    meta={data.copy.latestMeta}
+                    meta={copy.latestMeta}
                     latestPublishedAt={data.feedStories[0]?.publishedAt}
                   />
                 </div>
 
                 <div className={`${styles.heroSlot} ${styles.heroLogin}`.trim()}>
-                  <LoginModule moduleCopy={data.copy.loginModule} actionCopy={data.copy.loginActions} />
+                  <LoginModule moduleCopy={copy.loginModule} actionCopy={copy.loginActions} />
                 </div>
 
                 <a href={data.sideFeatures[1]!.href} className={`${styles.heroSlot} ${styles.heroDownload}`.trim()}>
@@ -261,10 +263,10 @@ export function HomePage({ data }: HomePageProps) {
             <section className={styles.feedSection} aria-labelledby="latest-feed">
               <div className={styles.sectionHeading}>
                 <div>
-                  <p>{data.copy.feedHeading.eyebrow}</p>
-                  <h2 id="latest-feed">{data.copy.feedHeading.title}</h2>
+                  <p>{copy.feedHeading.eyebrow}</p>
+                  <h2 id="latest-feed">{copy.feedHeading.title}</h2>
                 </div>
-                <span className={styles.sectionHint}>{data.copy.feedHeading.hint}</span>
+                <span className={styles.sectionHint}>{copy.feedHeading.hint}</span>
               </div>
               <div className={styles.feedGrid}>
                 {data.feedStories.map((story) => (
@@ -281,7 +283,7 @@ export function HomePage({ data }: HomePageProps) {
 
             <section className={styles.loadMoreSection} aria-label="继续浏览">
               <a href="#page-2" className={styles.loadMoreLink}>
-                {data.copy.controls.loadMoreLabel}
+                {copy.controls.loadMoreLabel}
               </a>
               <div className={styles.paginationSection}>
                 <a href="#top" className={styles.paginationCurrent}>
@@ -299,7 +301,7 @@ export function HomePage({ data }: HomePageProps) {
       </main>
 
       <a className={styles.toTop} href="#top">
-        {hasRenderableHomePage ? data.copy.controls.backToTopLabel : "回到顶部"}
+        {hasRenderableHomePage ? copy.controls.backToTopLabel : "回到顶部"}
       </a>
 
       <footer className={styles.footer}>
@@ -307,8 +309,8 @@ export function HomePage({ data }: HomePageProps) {
           <div className={styles.footerBrand}>
             <span className={styles.footerBadge}>Q</span>
             <div>
-              <strong>{hasRenderableHomePage ? data.copy.footerBrand.title : "好奇心日报"}</strong>
-              <p>{hasRenderableHomePage ? data.copy.footerBrand.text : "用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。"}</p>
+              <strong>{hasRenderableHomePage ? copy.footerBrand.title : "好奇心日报"}</strong>
+              <p>{hasRenderableHomePage ? copy.footerBrand.text : "用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。"}</p>
             </div>
           </div>
 
@@ -328,17 +330,17 @@ export function HomePage({ data }: HomePageProps) {
             <div className={styles.footerTools}>
               <form className={styles.searchBox}>
                 <label className={styles.searchLabel} htmlFor="footer-search">
-                  {hasRenderableHomePage ? data.copy.footerSearch.label : "搜索文章"}
+                  {hasRenderableHomePage ? copy.footerSearch.label : "搜索文章"}
                 </label>
                 <input
                   id="footer-search"
                   name="search"
-                  placeholder={hasRenderableHomePage ? data.copy.footerSearch.placeholder : "输入关键词"}
+                  placeholder={hasRenderableHomePage ? copy.footerSearch.placeholder : "输入关键词"}
                   type="search"
                 />
               </form>
               <p className={styles.footerCopy}>
-                {hasRenderableHomePage ? data.copy.footerSearch.copyright : "2014 - 2026 QDaily Recreation Studio"}
+                {hasRenderableHomePage ? copy.footerSearch.copyright : "2014 - 2026 QDaily Recreation Studio"}
               </p>
             </div>
           </div>
