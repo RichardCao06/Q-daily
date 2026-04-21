@@ -1,20 +1,5 @@
-import {
-  articles,
-  featurePanels,
-  getArticleBySlug,
-  sideFeatures,
-  spotlightStory,
-} from "./qdaily-data";
-import {
-  getAllArticleSlugsFromSource,
-  getArticleBySlugFromSource,
-  getArticlesForSearchFromSource,
-  getHomePageData,
-  getRelatedArticlesFromSource,
-  mergeArticles,
-} from "./content-source";
-import { loadMarkdownArticles } from "./markdown-articles";
-import type { Article } from "./qdaily-data";
+import { defaultHomePageCopy } from "./qdaily-data";
+import { getHomePageData, mapHomepageModules } from "./content-source";
 
 describe("content source", () => {
   const previousUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -30,80 +15,179 @@ describe("content source", () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = previousAnonKey;
   });
 
-  it("falls back to the local editorial seed when Supabase is not configured", async () => {
-    const home = await getHomePageData();
-    const markdownArticleCount = (await loadMarkdownArticles()).length;
-
-    expect(home.spotlightStory.slug).toBe(spotlightStory.slug);
-    expect(home.sideFeatures).toHaveLength(sideFeatures.length);
-    expect(home.featurePanels.map((panel) => panel.slug)).toEqual(featurePanels.map((panel) => panel.slug));
-    expect(home.feedStories).toHaveLength(articles.length + markdownArticleCount);
-    expect(home.feedStories.some((story) => story.slug === "zhangxue-profile-editorial-reillustrated")).toBe(true);
-    expect(home.feedStories.some((story) => story.slug === "avo-paper-feature-editorial")).toBe(true);
-    expect(home.feedStories.some((story) => story.slug === "heqiong-profile-editorial")).toBe(true);
+  it("throws when Supabase is not configured instead of falling back to local data", async () => {
+    await expect(getHomePageData()).rejects.toThrow("Supabase");
   });
 
-  it("resolves article details and related stories through the async repository API", async () => {
-    const article = await getArticleBySlugFromSource("rebuild-a-newsroom-wall");
-    const related = await getRelatedArticlesFromSource("rebuild-a-newsroom-wall", 3);
+  it("treats an empty homepage module table as empty homepage state", () => {
+    const modules = mapHomepageModules([]);
 
-    expect(article?.slug).toBe(getArticleBySlug("rebuild-a-newsroom-wall")?.slug);
-    expect(related).toHaveLength(3);
-    expect(related.every((story) => story.slug !== "rebuild-a-newsroom-wall")).toBe(true);
-    expect(related.some((story) => story.slug === "zhangxue-profile-editorial-reillustrated")).toBe(true);
+    expect(modules.spotlightStory).toBeNull();
+    expect(modules.featurePanels).toEqual([]);
+    expect(modules.sideFeatures).toEqual([]);
+    expect(modules.copy).toBeNull();
   });
 
-  it("provides search listings and static params from the same source", async () => {
-    const searchArticles = await getArticlesForSearchFromSource();
-    const slugs = await getAllArticleSlugsFromSource();
-    const markdownArticleCount = (await loadMarkdownArticles()).length;
-
-    expect(searchArticles).toHaveLength(articles.length + markdownArticleCount);
-    expect(slugs).toContain("rebuild-a-newsroom-wall");
-    expect(slugs).toContain("zhangxue-profile-editorial-reillustrated");
-    expect(slugs).toContain("avo-paper-feature-editorial");
-    expect(slugs).toContain("heqiong-profile-editorial");
-    expect(slugs).toHaveLength(articles.length + markdownArticleCount);
-  });
-
-  it("merges repository-backed markdown longform stories into the shared content source", async () => {
-    const article = await getArticleBySlugFromSource("zhangxue-profile-editorial-reillustrated");
-    const searchArticles = await getArticlesForSearchFromSource();
-    const slugs = await getAllArticleSlugsFromSource();
-
-    expect(article?.layout).toBe("longform");
-    expect(article?.heroImage?.src).toBe("/editorial/zhangxue/hero-media-news-1.jpg");
-    expect(article?.longformBlocks?.some((block) => block.type === "image")).toBe(true);
-    expect(searchArticles.some((item) => item.slug === "zhangxue-profile-editorial-reillustrated")).toBe(true);
-    expect(slugs).toContain("zhangxue-profile-editorial-reillustrated");
-  });
-
-  it("prefers Supabase articles over repository markdown when the same slug exists in both sources", () => {
-    const supabaseArticle = {
-      ...articles[0],
-      slug: "shared-slug",
-      title: "Supabase version",
-      source: "supabase",
-      heroImage: {
-        src: "https://cdn.example.com/articles/shared-slug/hero.jpg",
-        alt: "Supabase hero",
+  it("extracts homepage copy blocks from dedicated slot keys", () => {
+    const modules = mapHomepageModules([
+      {
+        slot_key: "home-curator-note",
+        slot_type: "side_feature",
+        sort_order: 1,
+        article_slug: null,
+        category_label: "本日导览",
+        title: "导语标题不会用到",
+        excerpt: "这一版首页导语来自数据库。",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
       },
-    } satisfies Article;
-    const markdownArticle = {
-      ...articles[1],
-      slug: "shared-slug",
-      title: "Markdown version",
-      source: "markdown",
-      heroImage: {
-        src: "/editorial/shared/hero.jpg",
-        alt: "Markdown hero",
+      {
+        slot_key: "home-curator-kicker",
+        slot_type: "side_feature",
+        sort_order: 2,
+        article_slug: null,
+        category_label: "",
+        title: "Daily Brief",
+        excerpt: "右侧策展说明来自数据库。",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
       },
-    } satisfies Article;
+      {
+        slot_key: "home-editor-memo",
+        slot_type: "side_feature",
+        sort_order: 3,
+        article_slug: null,
+        category_label: "值班编辑",
+        title: "",
+        excerpt: "编者手记来自数据库。",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-latest-meta",
+        slot_type: "side_feature",
+        sort_order: 4,
+        article_slug: null,
+        category_label: "刚刚更新",
+        title: "同步于",
+        excerpt: "",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-login",
+        slot_type: "side_feature",
+        sort_order: 5,
+        article_slug: null,
+        category_label: "读者账户",
+        title: "进入账户",
+        excerpt: "账户模块说明来自数据库。",
+        href: "/account/login",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-login-actions",
+        slot_type: "side_feature",
+        sort_order: 6,
+        article_slug: null,
+        category_label: "立即登录",
+        title: "创建账户",
+        excerpt: "",
+        href: "/account/login",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-feed-heading",
+        slot_type: "side_feature",
+        sort_order: 7,
+        article_slug: null,
+        category_label: "Supabase Feed",
+        title: "数据库驱动的首页文章流",
+        excerpt: "这段说明也来自数据库。",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-controls",
+        slot_type: "side_feature",
+        sort_order: 8,
+        article_slug: null,
+        category_label: "继续展开",
+        title: "返回顶部",
+        excerpt: "",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-footer-brand",
+        slot_type: "side_feature",
+        sort_order: 9,
+        article_slug: null,
+        category_label: "数据库日报",
+        title: "页脚品牌说明来自数据库。",
+        excerpt: "",
+        href: "/",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+      {
+        slot_key: "home-search",
+        slot_type: "side_feature",
+        sort_order: 10,
+        article_slug: null,
+        category_label: "搜索数据库文章",
+        title: "输入 Supabase 关键词",
+        excerpt: "2026 Supabase-driven QDaily",
+        href: "/search",
+        palette: "linear-gradient(135deg, #111 0%, #333 100%)",
+      },
+    ]);
 
-    const merged = mergeArticles([supabaseArticle], [markdownArticle]);
-
-    expect(merged).toHaveLength(1);
-    expect(merged[0]?.title).toBe("Supabase version");
-    expect(merged[0]?.heroImage?.src).toBe("https://cdn.example.com/articles/shared-slug/hero.jpg");
+    expect(modules.copy).toEqual({
+      ...defaultHomePageCopy,
+      curatorNote: {
+        label: "本日导览",
+        text: "这一版首页导语来自数据库。",
+      },
+      curatorKicker: {
+        title: "Daily Brief",
+        text: "右侧策展说明来自数据库。",
+      },
+      editorMemo: {
+        label: "值班编辑",
+        text: "编者手记来自数据库。",
+      },
+      latestMeta: {
+        statusLabel: "刚刚更新",
+        updatedAtPrefix: "同步于",
+      },
+      loginModule: {
+        eyebrow: "读者账户",
+        title: "进入账户",
+        text: "账户模块说明来自数据库。",
+        href: "/account/login",
+      },
+      loginActions: {
+        loginLabel: "立即登录",
+        registerLabel: "创建账户",
+      },
+      feedHeading: {
+        eyebrow: "Supabase Feed",
+        title: "数据库驱动的首页文章流",
+        hint: "这段说明也来自数据库。",
+      },
+      controls: {
+        loadMoreLabel: "继续展开",
+        backToTopLabel: "返回顶部",
+      },
+      footerBrand: {
+        title: "数据库日报",
+        text: "页脚品牌说明来自数据库。",
+      },
+      footerSearch: {
+        label: "搜索数据库文章",
+        placeholder: "输入 Supabase 关键词",
+        copyright: "2026 Supabase-driven QDaily",
+      },
+    });
   });
 });

@@ -120,11 +120,21 @@ insert into public.homepage_modules (
   palette
 )
 values
-  ('home-spotlight', 'spotlight', 10, 'rebuild-a-newsroom-wall', '精选专题', 'QDaily Edition #001: A newsroom rebuilt as a magazine wall.', '用高密度卡片、醒目的分类标签和强节奏的编排，把首页重新做成一面值得停留的编辑墙。', '/categories/business', 'linear-gradient(135deg, #0f1316 0%, #30373d 45%, #ffc81f 100%)'),
-  ('home-feature-1', 'feature', 20, 'feature-cards-need-clear-boundaries', '文化', '专题卡和常规文章卡的边界要明显，这样首屏才会像一份刊物。', '专题使用更厚重的视觉和更长的文字区，常规卡片则更利落、重复、清晰。', '/articles/feature-cards-need-clear-boundaries', 'linear-gradient(135deg, #7f7a55 0%, #262212 100%)'),
-  ('home-feature-2', 'feature', 30, 'micro-differences-between-cards', '设计', '每张卡片都需要自己的节奏，统一里要有细小而明确的差别。', '卡片的图片区、角标、标题行长和底部统计共同决定阅读速度。', '/articles/micro-differences-between-cards', 'linear-gradient(135deg, #efc13c 0%, #5a4512 100%)'),
-  ('home-side-latest', 'side_feature', 40, null, '今日要闻', '24', '一页里值得打开的内容更新', '/categories/business', 'linear-gradient(180deg, #1d262a 0%, #111517 100%)'),
-  ('home-side-download', 'side_feature', 50, null, 'QDaily App', '保持黄黑色的锋利感', '下载入口、品牌说明和次级 CTA 放在首屏右侧，延续原站的编辑产品感。', '/about', 'linear-gradient(135deg, #f7d21b 0%, #ffea93 100%)')
+  ('home-curator-note', 'side_feature', 1, null, '今日策展', '首页导语', '像一本被翻开的周末杂志，留下呼吸感，也留下值得细看的新闻。', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-curator-kicker', 'side_feature', 2, null, '', 'Fresh Reading', '在保持首页编排效率的同时，把内容重新摆回更轻、更安静、更有策展感的视觉秩序里。', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-editor-memo', 'side_feature', 3, null, '编者手记', '', '今天的首页故意把节奏放慢一点，让重要内容像展墙上的作品说明，而不是被挤进一面过度喧闹的信息墙。', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-latest-meta', 'side_feature', 4, null, '最新', '更新于', '', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-login', 'side_feature', 5, null, 'QDaily 会员', '登录 / 注册', '收藏文章、参与评论、同步阅读进度，保持和原版 QDaily 一样紧凑的个人入口节奏。', '/account', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-login-actions', 'side_feature', 6, null, '登录', '注册', '', '/account', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-feed-heading', 'side_feature', 7, null, 'Latest Stories', '编辑挑选的首页文章流', '不再强调压迫式信息墙，而让每一条内容都像被认真摆放过的展签。', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-controls', 'side_feature', 8, null, '加载更多', '回到顶部', '', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-footer-brand', 'side_feature', 9, null, '好奇心日报', '用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。', '', '/', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-search', 'side_feature', 10, null, '搜索文章', '输入关键词', '2014 - 2026 QDaily Recreation Studio', '/search', 'linear-gradient(135deg, #111 0%, #333 100%)'),
+  ('home-spotlight', 'spotlight', 100, 'rebuild-a-newsroom-wall', '精选专题', 'QDaily Edition #001: A newsroom rebuilt as a magazine wall.', '用高密度卡片、醒目的分类标签和强节奏的编排，把首页重新做成一面值得停留的编辑墙。', '/categories/business', 'linear-gradient(135deg, #0f1316 0%, #30373d 45%, #ffc81f 100%)'),
+  ('home-feature-1', 'feature', 110, 'feature-cards-need-clear-boundaries', '文化', '专题卡和常规文章卡的边界要明显，这样首屏才会像一份刊物。', '专题使用更厚重的视觉和更长的文字区，常规卡片则更利落、重复、清晰。', '/articles/feature-cards-need-clear-boundaries', 'linear-gradient(135deg, #7f7a55 0%, #262212 100%)'),
+  ('home-feature-2', 'feature', 120, 'micro-differences-between-cards', '设计', '每张卡片都需要自己的节奏，统一里要有细小而明确的差别。', '卡片的图片区、角标、标题行长和底部统计共同决定阅读速度。', '/articles/micro-differences-between-cards', 'linear-gradient(135deg, #efc13c 0%, #5a4512 100%)'),
+  ('home-side-latest', 'side_feature', 130, null, '今日要闻', '24', '一页里值得打开的内容更新', '/categories/business', 'linear-gradient(180deg, #1d262a 0%, #111517 100%)'),
+  ('home-side-download', 'side_feature', 140, null, 'QDaily App', '保持黄黑色的锋利感', '下载入口、品牌说明和次级 CTA 放在首屏右侧，延续原站的编辑产品感。', '/about', 'linear-gradient(135deg, #f7d21b 0%, #ffea93 100%)')
 on conflict (slot_key) do update set
   slot_type = excluded.slot_type,
   sort_order = excluded.sort_order,

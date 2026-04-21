@@ -1,15 +1,8 @@
 import type { CSSProperties } from "react";
 
 import {
-  channelLinks,
-  featurePanels,
-  feedStories,
-  footerColumns,
   type HomePageData,
-  primaryLinks,
-  sideFeatures,
-  spotlightStory,
-  utilityLinks,
+  type HomePageCopy,
 } from "@/lib/qdaily-data";
 
 import styles from "./home-page.module.css";
@@ -79,49 +72,82 @@ function VisualCard({
   );
 }
 
-function LatestModule({ latestStory }: { latestStory: HomePageData["sideFeatures"][0] }) {
+function formatLatestPublishedAt(publishedAt?: string) {
+  if (!publishedAt) {
+    return null;
+  }
+
+  const match = publishedAt.match(/^\d{4}-(\d{2})-(\d{2})/);
+  if (!match) {
+    return publishedAt;
+  }
+
+  return `${match[1]} / ${match[2]}`;
+}
+
+function LatestModule({
+  latestStory,
+  meta,
+  latestPublishedAt,
+}: {
+  latestStory: HomePageData["sideFeatures"][0];
+  meta: HomePageCopy["latestMeta"];
+  latestPublishedAt?: string;
+}) {
+  const formattedLatestPublishedAt = formatLatestPublishedAt(latestPublishedAt);
+
   return (
     <a className={styles.latestLink} href={latestStory.href}>
       <article className={styles.latestModule}>
         <div className={styles.latestHeader}>
           <span>{latestStory.category}</span>
-          <span>最新</span>
+          <span>{meta.statusLabel}</span>
         </div>
-        <div className={styles.latestDigits}>24</div>
+        <div className={styles.latestDigits}>{latestStory.title}</div>
         <p className={styles.latestCopy}>{latestStory.excerpt}</p>
-        <div className={styles.latestFooter}>更新于 03 / 30</div>
+        {formattedLatestPublishedAt ? (
+          <div className={styles.latestFooter}>
+            {meta.updatedAtPrefix} {formattedLatestPublishedAt}
+          </div>
+        ) : null}
       </article>
     </a>
   );
 }
 
-function LoginModule() {
+function LoginModule({
+  moduleCopy,
+  actionCopy,
+}: {
+  moduleCopy: HomePageCopy["loginModule"];
+  actionCopy: HomePageCopy["loginActions"];
+}) {
   return (
     <section className={styles.loginModule} aria-label="登录模块">
-      <p className={styles.moduleEyebrow}>QDaily 会员</p>
-      <h2 className={styles.loginTitle}>登录 / 注册</h2>
-      <p className={styles.loginCopy}>收藏文章、参与评论、同步阅读进度，保持和原版 QDaily 一样紧凑的个人入口节奏。</p>
+      <p className={styles.moduleEyebrow}>{moduleCopy.eyebrow}</p>
+      <h2 className={styles.loginTitle}>{moduleCopy.title}</h2>
+      <p className={styles.loginCopy}>{moduleCopy.text}</p>
       <div className={styles.loginActions}>
-        <a href="/account">登录</a>
-        <a href="/account">注册</a>
+        <a href={moduleCopy.href}>{actionCopy.loginLabel}</a>
+        <a href={moduleCopy.href}>{actionCopy.registerLabel}</a>
       </div>
     </section>
   );
 }
 
 type HomePageProps = {
-  data?: HomePageData;
+  data: HomePageData;
 };
 
-export function HomePage({
-  data = {
-    spotlightStory,
-    sideFeatures,
-    featurePanels,
-    feedStories,
-  },
-}: HomePageProps) {
+export function HomePage({ data }: HomePageProps) {
   const emphasizedStoryIds = new Set(data.feedStories.slice(0, 2).map((story) => story.id));
+  const hasRenderableHomePage =
+    !data.isEmpty &&
+    Boolean(data.copy) &&
+    Boolean(data.spotlightStory) &&
+    data.featurePanels.length >= 2 &&
+    data.sideFeatures.length >= 2 &&
+    data.feedStories.length > 0;
 
   return (
     <div className={styles.page} id="top">
@@ -137,7 +163,7 @@ export function HomePage({
             </a>
             <nav aria-label="主导航">
               <ul className={styles.mainNav}>
-                {primaryLinks.map((item) => (
+                {data.primaryLinks.map((item) => (
                   <li key={item.label}>
                     <a href={item.href}>{item.label}</a>
                   </li>
@@ -147,7 +173,7 @@ export function HomePage({
           </div>
           <nav className={styles.headerCenter} aria-label="频道导航">
             <ul className={styles.categoryNav}>
-              {channelLinks.map((item) => (
+              {data.channelLinks.map((item) => (
                 <li key={item.label}>
                   <a href={item.href}>{item.label}</a>
                 </li>
@@ -155,7 +181,7 @@ export function HomePage({
             </ul>
           </nav>
           <div className={styles.headerRight}>
-            {utilityLinks.map((item) => (
+            {data.utilityLinks.map((item) => (
               <a key={item.label} href={item.href}>
                 {item.label}
               </a>
@@ -166,94 +192,114 @@ export function HomePage({
       </header>
 
       <main className={styles.main}>
-        <section className={styles.curatorIntro} aria-label="首页导语">
-          <div className={styles.curatorNote}>
-            <span>今日策展</span>
-            <p>像一本被翻开的周末杂志，留下呼吸感，也留下值得细看的新闻。</p>
-          </div>
-          <div className={styles.curatorKicker}>
-            <strong>Fresh Reading</strong>
-            <p>在保持首页编排效率的同时，把内容重新摆回更轻、更安静、更有策展感的视觉秩序里。</p>
-            <div className={styles.editorMemo}>
-              <span>编者手记</span>
-              <p>今天的首页故意把节奏放慢一点，让重要内容像展墙上的作品说明，而不是被挤进一面过度喧闹的信息墙。</p>
-            </div>
-          </div>
-        </section>
+        {!hasRenderableHomePage ? (
+          <section className={styles.emptyState} aria-label="首页空状态">
+            <span className={styles.emptyEyebrow}>Supabase Homepage</span>
+            <h1>首页内容暂未配置</h1>
+            <p>请先在 Supabase 中发布文章并配置首页模块，首页才会显示正式内容。</p>
+          </section>
+        ) : (
+          <>
+            <section className={styles.heroBoard} aria-label="首页主编排">
+              <div className={styles.heroMasthead}>
+                <section className={styles.curatorNote} aria-label="首页导语">
+                  <span>{data.copy.curatorNote.label}</span>
+                  <p>{data.copy.curatorNote.text}</p>
+                </section>
 
-        <section className={styles.heroBoard} aria-label="首页主编排">
-          <a href={`/articles/${data.spotlightStory.slug}`} className={`${styles.heroSlot} ${styles.heroLead}`.trim()}>
-            <VisualCard {...data.spotlightStory} className={styles.leadCard} titleLevel="h2" accent="light" />
-          </a>
+                <div className={styles.curatorKicker}>
+                  <strong>{data.copy.curatorKicker.title}</strong>
+                  <p>{data.copy.curatorKicker.text}</p>
+                  <div className={styles.editorMemo}>
+                    <span>{data.copy.editorMemo.label}</span>
+                    <p>{data.copy.editorMemo.text}</p>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.heroEditorialColumn}>
+                <a href={`/articles/${data.spotlightStory!.slug}`} className={`${styles.heroSlot} ${styles.heroLead}`.trim()}>
+                  <VisualCard {...data.spotlightStory!} className={styles.leadCard} titleLevel="h2" accent="light" />
+                </a>
 
-          <div className={`${styles.heroSlot} ${styles.heroLogin}`.trim()}>
-            <LoginModule />
-          </div>
+                <div className={styles.heroFeatureRow}>
+                  <a href={data.featurePanels[0]!.href} className={`${styles.heroSlot} ${styles.heroFeatureLarge}`.trim()}>
+                    <VisualCard {...data.featurePanels[0]!} className={styles.featureLargeCard} />
+                  </a>
 
-          <div className={`${styles.heroSlot} ${styles.heroLatest}`.trim()}>
-            <LatestModule latestStory={data.sideFeatures[0]} />
-          </div>
+                  <a href={data.featurePanels[1]!.href} className={`${styles.heroSlot} ${styles.heroFeatureSmall}`.trim()}>
+                    <VisualCard {...data.featurePanels[1]!} className={styles.featureSmallCard} />
+                  </a>
+                </div>
+              </div>
 
-          <a href={data.featurePanels[0].href} className={`${styles.heroSlot} ${styles.heroFeatureLarge}`.trim()}>
-            <VisualCard {...data.featurePanels[0]} className={styles.featureLargeCard} />
-          </a>
+              <div className={styles.heroRail}>
+                <div className={`${styles.heroSlot} ${styles.heroLatest}`.trim()}>
+                  <LatestModule
+                    latestStory={data.sideFeatures[0]}
+                    meta={data.copy.latestMeta}
+                    latestPublishedAt={data.feedStories[0]?.publishedAt}
+                  />
+                </div>
 
-          <a href={data.featurePanels[1].href} className={`${styles.heroSlot} ${styles.heroFeatureSmall}`.trim()}>
-            <VisualCard {...data.featurePanels[1]} className={styles.featureSmallCard} />
-          </a>
+                <div className={`${styles.heroSlot} ${styles.heroLogin}`.trim()}>
+                  <LoginModule moduleCopy={data.copy.loginModule} actionCopy={data.copy.loginActions} />
+                </div>
 
-          <a href={data.sideFeatures[1].href} className={`${styles.heroSlot} ${styles.heroDownload}`.trim()}>
-            <VisualCard
-              category={data.sideFeatures[1].category}
-              title={data.sideFeatures[1].title}
-              excerpt={data.sideFeatures[1].excerpt}
-              palette={data.sideFeatures[1].palette}
-              className={styles.downloadCard}
-              accent="light"
-            />
-          </a>
-        </section>
+                <a href={data.sideFeatures[1]!.href} className={`${styles.heroSlot} ${styles.heroDownload}`.trim()}>
+                  <VisualCard
+                    category={data.sideFeatures[1]!.category}
+                    title={data.sideFeatures[1]!.title}
+                    excerpt={data.sideFeatures[1]!.excerpt}
+                    palette={data.sideFeatures[1]!.palette}
+                    className={styles.downloadCard}
+                    accent="light"
+                  />
+                </a>
+              </div>
+            </section>
 
-        <section className={styles.feedSection} aria-labelledby="latest-feed">
-          <div className={styles.sectionHeading}>
-            <div>
-              <p>Latest Stories</p>
-              <h2 id="latest-feed">编辑挑选的首页文章流</h2>
-            </div>
-            <span className={styles.sectionHint}>不再强调压迫式信息墙，而让每一条内容都像被认真摆放过的展签。</span>
-          </div>
-          <div className={styles.feedGrid}>
-            {data.feedStories.map((story) => (
-              <a
-                key={story.id}
-                href={`/articles/${story.slug}`}
-                className={`${styles.feedLink} ${emphasizedStoryIds.has(story.id) ? styles.feedWide : ""}`.trim()}
-              >
-                <VisualCard {...story} className={styles.feedCard} />
+            <section className={styles.feedSection} aria-labelledby="latest-feed">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <p>{data.copy.feedHeading.eyebrow}</p>
+                  <h2 id="latest-feed">{data.copy.feedHeading.title}</h2>
+                </div>
+                <span className={styles.sectionHint}>{data.copy.feedHeading.hint}</span>
+              </div>
+              <div className={styles.feedGrid}>
+                {data.feedStories.map((story) => (
+                  <a
+                    key={story.id}
+                    href={`/articles/${story.slug}`}
+                    className={`${styles.feedLink} ${emphasizedStoryIds.has(story.id) ? styles.feedWide : ""}`.trim()}
+                  >
+                    <VisualCard {...story} className={styles.feedCard} />
+                  </a>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.loadMoreSection} aria-label="继续浏览">
+              <a href="#page-2" className={styles.loadMoreLink}>
+                {data.copy.controls.loadMoreLabel}
               </a>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.loadMoreSection} aria-label="继续浏览">
-          <a href="#page-2" className={styles.loadMoreLink}>
-            加载更多
-          </a>
-          <div className={styles.paginationSection}>
-            <a href="#top" className={styles.paginationCurrent}>
-              1
-            </a>
-            <a href="#page-2">2</a>
-            <a href="#page-3">3</a>
-            <a href="#page-4">4</a>
-            <span>...</span>
-            <a href="#page-2595">2595</a>
-          </div>
-        </section>
+              <div className={styles.paginationSection}>
+                <a href="#top" className={styles.paginationCurrent}>
+                  1
+                </a>
+                <a href="#page-2">2</a>
+                <a href="#page-3">3</a>
+                <a href="#page-4">4</a>
+                <span>...</span>
+                <a href="#page-2595">2595</a>
+              </div>
+            </section>
+          </>
+        )}
       </main>
 
       <a className={styles.toTop} href="#top">
-        回到顶部
+        {hasRenderableHomePage ? data.copy.controls.backToTopLabel : "回到顶部"}
       </a>
 
       <footer className={styles.footer}>
@@ -261,14 +307,14 @@ export function HomePage({
           <div className={styles.footerBrand}>
             <span className={styles.footerBadge}>Q</span>
             <div>
-              <strong>好奇心日报</strong>
-              <p>用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。</p>
+              <strong>{hasRenderableHomePage ? data.copy.footerBrand.title : "好奇心日报"}</strong>
+              <p>{hasRenderableHomePage ? data.copy.footerBrand.text : "用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。"}</p>
             </div>
           </div>
 
           <div className={styles.footerMain}>
             <div className={styles.footerColumns}>
-              {footerColumns.map((column, index) => (
+              {data.footerColumns.map((column, index) => (
                 <ul key={index} className={styles.footerColumn}>
                   {column.map((item) => (
                     <li key={item.label}>
@@ -282,11 +328,18 @@ export function HomePage({
             <div className={styles.footerTools}>
               <form className={styles.searchBox}>
                 <label className={styles.searchLabel} htmlFor="footer-search">
-                  搜索文章
+                  {hasRenderableHomePage ? data.copy.footerSearch.label : "搜索文章"}
                 </label>
-                <input id="footer-search" name="search" placeholder="输入关键词" type="search" />
+                <input
+                  id="footer-search"
+                  name="search"
+                  placeholder={hasRenderableHomePage ? data.copy.footerSearch.placeholder : "输入关键词"}
+                  type="search"
+                />
               </form>
-              <p className={styles.footerCopy}>2014 - 2026 QDaily Recreation Studio</p>
+              <p className={styles.footerCopy}>
+                {hasRenderableHomePage ? data.copy.footerSearch.copyright : "2014 - 2026 QDaily Recreation Studio"}
+              </p>
             </div>
           </div>
         </div>

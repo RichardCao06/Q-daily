@@ -56,10 +56,63 @@ export type SideFeature = {
 };
 
 export type HomePageData = {
-  spotlightStory: SpotlightStory;
+  spotlightStory: SpotlightStory | null;
   sideFeatures: SideFeature[];
   featurePanels: FeaturePanel[];
   feedStories: Story[];
+  copy: HomePageCopy | null;
+  channelLinks: SiteLink[];
+  primaryLinks: SiteLink[];
+  utilityLinks: SiteLink[];
+  footerColumns: SiteLink[][];
+  isEmpty: boolean;
+};
+
+export type HomePageCopy = {
+  curatorNote: {
+    label: string;
+    text: string;
+  };
+  curatorKicker: {
+    title: string;
+    text: string;
+  };
+  editorMemo: {
+    label: string;
+    text: string;
+  };
+  latestMeta: {
+    statusLabel: string;
+    updatedAtPrefix: string;
+  };
+  loginModule: {
+    eyebrow: string;
+    title: string;
+    text: string;
+    href: string;
+  };
+  loginActions: {
+    loginLabel: string;
+    registerLabel: string;
+  };
+  feedHeading: {
+    eyebrow: string;
+    title: string;
+    hint: string;
+  };
+  controls: {
+    loadMoreLabel: string;
+    backToTopLabel: string;
+  };
+  footerBrand: {
+    title: string;
+    text: string;
+  };
+  footerSearch: {
+    label: string;
+    placeholder: string;
+    copyright: string;
+  };
 };
 
 export type SiteLink = {
@@ -365,6 +418,53 @@ export const utilityLinks: SiteLink[] = [
   { label: "搜索", href: "/search" },
   { label: "关于我们", href: "/about" },
 ];
+
+export const defaultHomePageCopy: HomePageCopy = {
+  curatorNote: {
+    label: "今日策展",
+    text: "像一本被翻开的周末杂志，留下呼吸感，也留下值得细看的新闻。",
+  },
+  curatorKicker: {
+    title: "Fresh Reading",
+    text: "在保持首页编排效率的同时，把内容重新摆回更轻、更安静、更有策展感的视觉秩序里。",
+  },
+  editorMemo: {
+    label: "编者手记",
+    text: "今天的首页故意把节奏放慢一点，让重要内容像展墙上的作品说明，而不是被挤进一面过度喧闹的信息墙。",
+  },
+  latestMeta: {
+    statusLabel: "最新",
+    updatedAtPrefix: "更新于",
+  },
+  loginModule: {
+    eyebrow: "QDaily 会员",
+    title: "登录 / 注册",
+    text: "收藏文章、参与评论、同步阅读进度，保持和原版 QDaily 一样紧凑的个人入口节奏。",
+    href: "/account",
+  },
+  loginActions: {
+    loginLabel: "登录",
+    registerLabel: "注册",
+  },
+  feedHeading: {
+    eyebrow: "Latest Stories",
+    title: "编辑挑选的首页文章流",
+    hint: "不再强调压迫式信息墙，而让每一条内容都像被认真摆放过的展签。",
+  },
+  controls: {
+    loadMoreLabel: "加载更多",
+    backToTopLabel: "回到顶部",
+  },
+  footerBrand: {
+    title: "好奇心日报",
+    text: "用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。",
+  },
+  footerSearch: {
+    label: "搜索文章",
+    placeholder: "输入关键词",
+    copyright: "2014 - 2026 QDaily Recreation Studio",
+  },
+};
 
 export const spotlightStory: SpotlightStory = {
   slug: articles[0].slug,
