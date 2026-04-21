@@ -142,13 +142,7 @@ type HomePageProps = {
 
 export function HomePage({ data }: HomePageProps) {
   const emphasizedStoryIds = new Set(data.feedStories.slice(0, 2).map((story) => story.id));
-  const hasRenderableHomePage =
-    !data.isEmpty &&
-    Boolean(data.copy) &&
-    Boolean(data.spotlightStory) &&
-    data.featurePanels.length >= 2 &&
-    data.sideFeatures.length >= 2 &&
-    data.feedStories.length > 0;
+  const hasRenderableHomePage = !data.isEmpty && Boolean(data.spotlightStory) && data.feedStories.length > 0;
   const copy = data.copy ?? defaultHomePageCopy;
 
   return (
@@ -219,44 +213,56 @@ export function HomePage({ data }: HomePageProps) {
                 </div>
               </div>
               <div className={styles.heroEditorialColumn}>
-                <a href={`/articles/${data.spotlightStory!.slug}`} className={`${styles.heroSlot} ${styles.heroLead}`.trim()}>
-                  <VisualCard {...data.spotlightStory!} className={styles.leadCard} titleLevel="h2" accent="light" />
-                </a>
-
-                <div className={styles.heroFeatureRow}>
-                  <a href={data.featurePanels[0]!.href} className={`${styles.heroSlot} ${styles.heroFeatureLarge}`.trim()}>
-                    <VisualCard {...data.featurePanels[0]!} className={styles.featureLargeCard} />
+                {data.spotlightStory ? (
+                  <a href={`/articles/${data.spotlightStory.slug}`} className={`${styles.heroSlot} ${styles.heroLead}`.trim()}>
+                    <VisualCard {...data.spotlightStory} className={styles.leadCard} titleLevel="h2" accent="light" />
                   </a>
+                ) : null}
 
-                  <a href={data.featurePanels[1]!.href} className={`${styles.heroSlot} ${styles.heroFeatureSmall}`.trim()}>
-                    <VisualCard {...data.featurePanels[1]!} className={styles.featureSmallCard} />
-                  </a>
-                </div>
+                {data.featurePanels.length > 0 ? (
+                  <div className={styles.heroFeatureRow}>
+                    {data.featurePanels[0] ? (
+                      <a href={data.featurePanels[0].href} className={`${styles.heroSlot} ${styles.heroFeatureLarge}`.trim()}>
+                        <VisualCard {...data.featurePanels[0]} className={styles.featureLargeCard} />
+                      </a>
+                    ) : null}
+
+                    {data.featurePanels[1] ? (
+                      <a href={data.featurePanels[1].href} className={`${styles.heroSlot} ${styles.heroFeatureSmall}`.trim()}>
+                        <VisualCard {...data.featurePanels[1]} className={styles.featureSmallCard} />
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
               <div className={styles.heroRail}>
-                <div className={`${styles.heroSlot} ${styles.heroLatest}`.trim()}>
-                  <LatestModule
-                    latestStory={data.sideFeatures[0]}
-                    meta={copy.latestMeta}
-                    latestPublishedAt={data.feedStories[0]?.publishedAt}
-                  />
-                </div>
+                {data.sideFeatures[0] ? (
+                  <div className={`${styles.heroSlot} ${styles.heroLatest}`.trim()}>
+                    <LatestModule
+                      latestStory={data.sideFeatures[0]}
+                      meta={copy.latestMeta}
+                      latestPublishedAt={data.feedStories[0]?.publishedAt}
+                    />
+                  </div>
+                ) : null}
 
                 <div className={`${styles.heroSlot} ${styles.heroLogin}`.trim()}>
                   <LoginModule moduleCopy={copy.loginModule} actionCopy={copy.loginActions} />
                 </div>
 
-                <a href={data.sideFeatures[1]!.href} className={`${styles.heroSlot} ${styles.heroDownload}`.trim()}>
-                  <VisualCard
-                    category={data.sideFeatures[1]!.category}
-                    title={data.sideFeatures[1]!.title}
-                    excerpt={data.sideFeatures[1]!.excerpt}
-                    palette={data.sideFeatures[1]!.palette}
-                    className={styles.downloadCard}
-                    accent="light"
-                  />
-                </a>
+                {data.sideFeatures[1] ? (
+                  <a href={data.sideFeatures[1].href} className={`${styles.heroSlot} ${styles.heroDownload}`.trim()}>
+                    <VisualCard
+                      category={data.sideFeatures[1].category}
+                      title={data.sideFeatures[1].title}
+                      excerpt={data.sideFeatures[1].excerpt}
+                      palette={data.sideFeatures[1].palette}
+                      className={styles.downloadCard}
+                      accent="light"
+                    />
+                  </a>
+                ) : null}
               </div>
             </section>
 

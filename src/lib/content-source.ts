@@ -248,6 +248,62 @@ export function mapHomepageModules(
   };
 }
 
+export function buildAutomaticHomepageModules(siteArticles: Article[]): Pick<SiteSnapshot, "spotlightStory" | "featurePanels" | "sideFeatures" | "copy"> {
+  const orderedArticles = [...siteArticles].sort(sortByPublishedAt);
+  const spotlightArticle = orderedArticles[0];
+  const featureArticles = orderedArticles.slice(1, 3);
+  const sideArticles = orderedArticles.slice(3, 5);
+
+  return {
+    spotlightStory: spotlightArticle
+      ? {
+          slug: spotlightArticle.slug,
+          category: spotlightArticle.category.name,
+          categoryHref: spotlightArticle.category.href,
+          title: spotlightArticle.title,
+          excerpt: spotlightArticle.excerpt,
+          palette: spotlightArticle.palette,
+          coverImage: spotlightArticle.heroImage
+            ? {
+                src: spotlightArticle.heroImage.src,
+                alt: spotlightArticle.heroImage.alt,
+              }
+            : undefined,
+        }
+      : null,
+    featurePanels: featureArticles.map((article) => ({
+      id: article.id,
+      slug: article.slug,
+      category: article.category.name,
+      title: article.title,
+      excerpt: article.excerpt,
+      palette: article.palette,
+      href: `/articles/${article.slug}`,
+      coverImage: article.heroImage
+        ? {
+            src: article.heroImage.src,
+            alt: article.heroImage.alt,
+          }
+        : undefined,
+    })),
+    sideFeatures: sideArticles.map((article) => ({
+      id: article.id,
+      category: article.category.name,
+      title: article.title,
+      excerpt: article.excerpt,
+      palette: article.palette,
+      href: `/articles/${article.slug}`,
+      coverImage: article.heroImage
+        ? {
+            src: article.heroImage.src,
+            alt: article.heroImage.alt,
+          }
+        : undefined,
+    })),
+    copy: defaultHomePageCopy,
+  };
+}
+
 function requireSupabaseServerClient() {
   const client = getSupabaseServerClient();
 
@@ -399,17 +455,19 @@ export async function getHomePageData(): Promise<HomePageData> {
   const snapshot = await loadSiteSnapshot();
   const chrome = buildSiteChromeData(snapshot.categories, snapshot.tags);
   const feedStories = buildFeedStories(snapshot.articles);
-  const isEmpty =
-    !snapshot.spotlightStory || snapshot.featurePanels.length < 2 || snapshot.sideFeatures.length < 2 || feedStories.length === 0;
+  const hasConfiguredHomepage =
+    Boolean(snapshot.spotlightStory) && snapshot.featurePanels.length >= 2 && snapshot.sideFeatures.length >= 2 && Boolean(snapshot.copy);
+  const homepageLayout = hasConfiguredHomepage ? snapshot : buildAutomaticHomepageModules(snapshot.articles);
+  const isEmpty = feedStories.length === 0;
 
   return {
     ...chrome,
-    spotlightStory: snapshot.spotlightStory,
-    sideFeatures: snapshot.sideFeatures,
-    featurePanels: snapshot.featurePanels,
+    spotlightStory: homepageLayout.spotlightStory,
+    sideFeatures: homepageLayout.sideFeatures,
+    featurePanels: homepageLayout.featurePanels,
     feedStories,
-    copy: snapshot.copy,
-    isEmpty: isEmpty || !snapshot.copy,
+    copy: homepageLayout.copy,
+    isEmpty,
   };
 }
 

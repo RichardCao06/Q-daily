@@ -1,5 +1,5 @@
-import { defaultHomePageCopy } from "./qdaily-data";
-import { getHomePageData, mapHomepageModules } from "./content-source";
+import { articles, defaultHomePageCopy } from "./qdaily-data";
+import { buildAutomaticHomepageModules, getHomePageData, mapHomepageModules } from "./content-source";
 
 describe("content source", () => {
   const previousUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -19,13 +19,19 @@ describe("content source", () => {
     await expect(getHomePageData()).rejects.toThrow("Supabase");
   });
 
-  it("treats an empty homepage module table as empty homepage state", () => {
-    const modules = mapHomepageModules([]);
+  it("derives homepage layout from the latest published articles when homepage modules are missing", () => {
+    const modules = buildAutomaticHomepageModules(articles);
 
-    expect(modules.spotlightStory).toBeNull();
-    expect(modules.featurePanels).toEqual([]);
-    expect(modules.sideFeatures).toEqual([]);
-    expect(modules.copy).toBeNull();
+    expect(modules.copy).toEqual(defaultHomePageCopy);
+    expect(modules.spotlightStory?.slug).toBe("cms-ready-editorial-system");
+    expect(modules.featurePanels.map((panel) => panel.slug)).toEqual([
+      "feature-cards-need-clear-boundaries",
+      "next-card-should-also-be-worth-reading",
+    ]);
+    expect(modules.sideFeatures.map((panel) => panel.href)).toEqual([
+      "/articles/yellow-and-black-brand-skeleton",
+      "/articles/density-fits-qdaily",
+    ]);
   });
 
   it("extracts homepage copy blocks from dedicated slot keys", () => {

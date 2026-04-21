@@ -79,6 +79,22 @@ describe("HomePage", () => {
       <HomePage
         data={{
           ...homePageData,
+          copy: null,
+          isEmpty: false,
+        }}
+      />,
+    );
+
+    expect(screen.queryByRole("heading", { level: 1, name: "首页内容暂未配置" })).not.toBeInTheDocument();
+    expect(screen.getByText("今日策展")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: spotlightStory.title })).toBeInTheDocument();
+  });
+
+  it("renders an empty state only when there are no stories to show at all", () => {
+    render(
+      <HomePage
+        data={{
+          ...homePageData,
           spotlightStory: null,
           sideFeatures: [],
           featurePanels: [],
