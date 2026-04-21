@@ -1,0 +1,56 @@
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cardbg" x1="114" y1="73" x2="1241" y2="839" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6F1E8"/>
+      <stop offset="1" stop-color="#E9E1D6"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="188" y1="199" x2="1215" y2="736" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#20364E"/>
+      <stop offset="1" stop-color="#C26D2D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="920" fill="#F0E9DD"/>
+  <rect x="48" y="48" width="1304" height="824" rx="34" fill="url(#cardbg)"/>
+  <text x="92" y="120" fill="#A45B22" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="26" letter-spacing="3">PROCESS CARD</text>
+  <text x="92" y="185" fill="#1A2735" font-family="PingFang SC, Noto Serif SC, serif" font-size="56" font-weight="700">GRIFT 在抓什么</text>
+  <text x="92" y="236" fill="#526474" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="30">不是只看模型写出来的推理链，而是看这段推理背后留下的内部梯度痕迹。</text>
+
+  <rect x="94" y="334" width="256" height="216" rx="26" fill="#FFFFFF" stroke="#D4C9BA" stroke-width="2"/>
+  <text x="124" y="388" fill="#B16328" font-family="SFMono-Regular, Menlo, monospace" font-size="22">STEP 1</text>
+  <text x="124" y="445" fill="#17212E" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="38" font-weight="700">题目与奖励</text>
+  <text x="124" y="496" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">模型在 RLVR 环境里</text>
+  <text x="124" y="534" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">生成答案和推理链，</text>
+  <text x="124" y="572" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">并获得对错反馈。</text>
+
+  <rect x="398" y="334" width="256" height="216" rx="26" fill="#FFFFFF" stroke="#D4C9BA" stroke-width="2"/>
+  <text x="428" y="388" fill="#B16328" font-family="SFMono-Regular, Menlo, monospace" font-size="22">STEP 2</text>
+  <text x="428" y="445" fill="#17212E" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="38" font-weight="700">提取梯度</text>
+  <text x="428" y="496" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">围绕 prompt 与 CoT，</text>
+  <text x="428" y="534" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">计算模型内部参数</text>
+  <text x="428" y="572" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">对应的梯度响应。</text>
+
+  <rect x="702" y="334" width="256" height="216" rx="26" fill="#FFFFFF" stroke="#D4C9BA" stroke-width="2"/>
+  <text x="732" y="388" fill="#B16328" font-family="SFMono-Regular, Menlo, monospace" font-size="22">STEP 3</text>
+  <text x="732" y="445" fill="#17212E" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="38" font-weight="700">压缩成指纹</text>
+  <text x="732" y="496" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">把高维梯度压缩成</text>
+  <text x="732" y="534" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">更可比对的 fingerprint，</text>
+  <text x="732" y="572" fill="#4F6272" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">作为行为特征。</text>
+
+  <rect x="1006" y="334" width="300" height="216" rx="26" fill="#1D2B39"/>
+  <text x="1038" y="388" fill="#FFBF7E" font-family="SFMono-Regular, Menlo, monospace" font-size="22">STEP 4</text>
+  <text x="1038" y="445" fill="#FFF8EF" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="38" font-weight="700">检测并抑制</text>
+  <text x="1038" y="496" fill="#D7E2EC" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">判断这次推理更像</text>
+  <text x="1038" y="534" fill="#D7E2EC" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">真实解题还是 reward</text>
+  <text x="1038" y="572" fill="#D7E2EC" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">hacking，并回灌训练。</text>
+
+  <path d="M350 443H398" stroke="url(#accent)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M654 443H702" stroke="url(#accent)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M958 443H1006" stroke="url(#accent)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M382 443L364 429V457L382 443Z" fill="#B96A2C"/>
+  <path d="M686 443L668 429V457L686 443Z" fill="#B96A2C"/>
+  <path d="M990 443L972 429V457L990 443Z" fill="#B96A2C"/>
+
+  <rect x="94" y="626" width="1212" height="174" rx="28" fill="#FFFDF8" stroke="#D6CBBB" stroke-width="2"/>
+  <text x="128" y="689" fill="#1C2937" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="34" font-weight="700">这篇论文想推进的，不只是“更会读 CoT”，而是“开始读系统”。</text>
+  <text x="128" y="742" fill="#576978" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28">如果表层文本可以被模型伪装得越来越像认真推理，那么更难伪装的内部信号，就可能成为下一轮可靠性基础设施的一部分。</text>
+</svg>

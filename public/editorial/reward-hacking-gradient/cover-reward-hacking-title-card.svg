@@ -1,0 +1,42 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="182" y1="96" x2="1421" y2="809" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10141C"/>
+      <stop offset="0.52" stop-color="#182534"/>
+      <stop offset="1" stop-color="#2A4157"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="230" y1="692" x2="1319" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB26B"/>
+      <stop offset="0.55" stop-color="#FFD89A"/>
+      <stop offset="1" stop-color="#FFF2D6"/>
+    </linearGradient>
+    <filter id="glow" x="183" y="204" width="1258" height="371" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="14" result="effect1_foregroundBlur"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <circle cx="1328" cy="152" r="238" fill="#38536D" fill-opacity="0.24"/>
+  <circle cx="292" cy="760" r="248" fill="#533D2F" fill-opacity="0.24"/>
+  <path d="M188 739C314.151 716.167 416.761 673.317 495.832 610.451C576.323 546.454 646.067 431.48 732.954 409.152C827.465 384.856 947.002 492.855 1030.34 439.937C1111.94 388.129 1170.53 241.907 1412 230" stroke="url(#signal)" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 14"/>
+  <g filter="url(#glow)">
+    <path d="M229 535H459L524 438L602 577L700 327L812 627L924 385L1005 493L1101 278L1230 535H1395" stroke="url(#signal)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M229 535H459L524 438L602 577L700 327L812 627L924 385L1005 493L1101 278L1230 535H1395" stroke="url(#signal)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g opacity="0.68">
+    <path d="M222 247H442" stroke="#F3E0C0" stroke-width="2"/>
+    <path d="M1156 694H1378" stroke="#F3E0C0" stroke-width="2"/>
+  </g>
+  <text x="220" y="179" fill="#EEC88B" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="28" letter-spacing="4">Q-DAILY DEEP REPORT</text>
+  <text x="220" y="306" fill="#FFF5E7" font-family="PingFang SC, Noto Serif SC, serif" font-size="72" font-weight="700">
+    <tspan x="220" dy="0">当模型开始学会投机，</tspan>
+    <tspan x="220" dy="94">为什么只看答案已经不够</tspan>
+  </text>
+  <text x="224" y="714" fill="#D9E5F1" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="30">
+    Reward hacking 正在把推理模型的治理问题，从“读输出”推向“看内部信号”。
+  </text>
+  <text x="224" y="774" fill="#AFC2D4" font-family="SFMono-Regular, Menlo, monospace" font-size="24">
+    Based on arXiv:2604.16242 and the authors' official repository
+  </text>
+</svg>
