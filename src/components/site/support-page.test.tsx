@@ -17,7 +17,7 @@ describe("SupportPage", () => {
         ]}
         actions={[
           { label: "返回首页", href: "/" },
-          { label: "查看长文章", href: "/tags/longform" },
+          { label: "查看好文章", href: "/tags/hao-wenzhang" },
         ]}
       />,
     );

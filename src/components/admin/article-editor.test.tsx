@@ -15,8 +15,8 @@ describe("ArticleEditor", () => {
         ]}
         authors={[{ slug: "richard-cao", name: "Richard Cao" }]}
         tags={[
-          { slug: "newsroom", name: "新闻编辑部" },
-          { slug: "product-thinking", name: "产品思考" },
+          { slug: "hao-wenzhang", name: "好文章" },
+          { slug: "hao-guandian", name: "好观点" },
         ]}
         onSave={onSave}
       />,
@@ -28,14 +28,14 @@ describe("ArticleEditor", () => {
     fireEvent.change(screen.getByLabelText("头图地址"), { target: { value: "https://cdn.example.com/articles/new-story/hero.jpg" } });
     fireEvent.change(screen.getByLabelText("头图图注"), { target: { value: "图注：头图说明。" } });
     fireEvent.change(screen.getByLabelText("Markdown 正文"), { target: { value: "第一段。\n\n第二段。" } });
-    fireEvent.click(screen.getByLabelText("新闻编辑部"));
+    fireEvent.click(screen.getByLabelText("好文章"));
     fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "新建文章",
         slug: "new-story",
-        tagSlugs: ["newsroom"],
+        tagSlugs: ["hao-wenzhang"],
         status: "draft",
         heroImageUrl: "https://cdn.example.com/articles/new-story/hero.jpg",
         heroImageCaption: "图注：头图说明。",
@@ -52,7 +52,7 @@ describe("ArticleEditor", () => {
         mode="edit"
         categories={[{ slug: "business", name: "商业" }]}
         authors={[{ slug: "richard-cao", name: "Richard Cao" }]}
-        tags={[{ slug: "newsroom", name: "新闻编辑部" }]}
+        tags={[{ slug: "hao-wenzhang", name: "好文章" }]}
         initialValue={{
           title: "已发布文章",
           slug: "published-story",
@@ -64,7 +64,7 @@ describe("ArticleEditor", () => {
           heroImageUrl: "https://cdn.example.com/articles/published-story/hero.jpg",
           heroImageCaption: "图注：已发布文章头图。",
           palette: "linear-gradient(135deg, #111 0%, #333 100%)",
-          tagSlugs: ["newsroom"],
+          tagSlugs: ["hao-wenzhang"],
           sourceMarkdown: "第一段。",
           status: "published",
           publishedAt: "2026-03-31T09:00:00.000Z",

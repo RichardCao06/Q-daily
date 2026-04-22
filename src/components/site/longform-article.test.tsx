@@ -18,7 +18,7 @@ const article = {
   coverAlt: "WSBK 葡萄牙站庆祝现场",
   body: ["很多人先认识张雪，不是因为一辆车。"],
   category: getCategoryBySlug("business")!,
-  tags: [getTagBySlug("longform")!, getTagBySlug("newsroom")!],
+  tags: [getTagBySlug("hao-wenzhang")!, getTagBySlug("hao-guandian")!],
   layout: "longform",
   heroImage: {
     src: "/editorial/zhangxue/hero-media-news-1.jpg",

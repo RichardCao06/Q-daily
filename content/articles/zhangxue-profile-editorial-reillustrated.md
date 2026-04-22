@@ -6,7 +6,7 @@ publishedAt: 2026-03-30T12:00:00+08:00
 author: Richard Cao
 readingTime: 9 分钟
 category: business
-tags: longform, culture-shift, newsroom
+tags: hao-wenzhang
 palette: linear-gradient(135deg, #2b211a 0%, #8d4d1f 52%, #f2cd6d 100%)
 coverAlt: WSBK 葡萄牙站夺冠后的庆祝现场
 heroImage: /editorial/zhangxue/hero-media-news-1.jpg

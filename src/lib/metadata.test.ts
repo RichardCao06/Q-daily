@@ -24,15 +24,15 @@ describe("metadata helpers", () => {
 
   it("builds collection metadata for categories and tags", () => {
     const category = getCategoryBySlug("business");
-    const tag = getTagBySlug("longform");
+    const tag = getTagBySlug("hao-wenzhang");
 
     expect(buildCollectionMetadata(category!, "category").title).toContain("商业");
-    expect(buildCollectionMetadata(tag!, "tag").title).toContain("长文章");
+    expect(buildCollectionMetadata(tag!, "tag").title).toContain("好文章");
     expect(buildCollectionMetadata(category!, "category").alternates?.canonical).toBe(
       "https://piggpywithpuppy.cn/categories/business",
     );
     expect(buildCollectionMetadata(tag!, "tag").alternates?.canonical).toBe(
-      "https://piggpywithpuppy.cn/tags/longform",
+      "https://piggpywithpuppy.cn/tags/hao-wenzhang",
     );
   });
 });

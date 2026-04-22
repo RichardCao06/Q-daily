@@ -1,3 +1,5 @@
+import { normalizedTagDefinitions } from "./tag-taxonomy";
+
 export type Story = {
   id: string;
   slug: string;
@@ -184,15 +186,10 @@ const categorySeed = [
   { slug: "gaming", name: "游戏" },
 ] as const;
 
-const tagSeed = [
-  { slug: "longform", name: "长文章" },
-  { slug: "ten-photos", name: "10 个图" },
-  { slug: "top-15", name: "Top 15" },
-  { slug: "editorial-design", name: "编辑设计" },
-  { slug: "product-thinking", name: "产品思考" },
-  { slug: "newsroom", name: "新闻编辑部" },
-  { slug: "culture-shift", name: "文化观察" },
-] as const;
+const tagSeed = normalizedTagDefinitions.map(({ slug, name }) => ({ slug, name })) as ReadonlyArray<{
+  slug: string;
+  name: string;
+}>;
 
 export const siteCategories: SiteCategory[] = categorySeed.map((item) => ({
   ...item,
@@ -238,7 +235,7 @@ const articleSeed = [
     readingTime: "8 分钟",
     coverAlt: "黄黑色块与编辑墙拼贴",
     categorySlug: "business",
-    tagSlugs: ["longform", "editorial-design", "product-thinking"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "复刻 QDaily 的关键不是把卡片数量堆到足够多，而是重新建立一种被编辑过的阅读秩序。首页像封面，栏位像版面，用户进入之后首先感知到的是气质而不是模块清单。",
       "这也是为什么头部、Hero 和文章流必须共用同一套视觉语言。黄色是抓手，黑色是骨架，白色和灰色留给内容本身，三者一起把品牌感钉住。",
@@ -258,7 +255,7 @@ const articleSeed = [
     readingTime: "6 分钟",
     coverAlt: "暗色纸张与标题条块",
     categorySlug: "culture",
-    tagSlugs: ["editorial-design", "culture-shift", "newsroom"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "QDaily 的头部不是普通导航栏，它更像纸媒页眉的数字版本。每个入口都要短、硬、直接，留给内容区更多张力。",
       "首页首屏则像一本杂志被摊开之后的第一个跨页，Hero 不是单纯的大图，而是编辑立场最直接的展示。",
@@ -278,7 +275,7 @@ const articleSeed = [
     readingTime: "5 分钟",
     coverAlt: "亮黄卡片与黑色边条",
     categorySlug: "design",
-    tagSlugs: ["editorial-design", "product-thinking"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "统一视觉系统不等于所有卡片都长得一样。真正决定首页节奏的，往往是标题的粗细、图片区比例和底部统计行的密度变化。",
       "这种细差异能让用户在快速滚动中仍然感知到节奏变化，从而保持继续阅读的动力。",
@@ -297,7 +294,7 @@ const articleSeed = [
     readingTime: "7 分钟",
     coverAlt: "蓝灰色信息墙",
     categorySlug: "smart",
-    tagSlugs: ["newsroom", "product-thinking"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "高密度编排的前提是足够强的结构控制，否则它只会变成拥挤。QDaily 的成功恰恰在于它把密度和秩序同时做到了。",
       "技术实现上我们会用可控的 grid 和数据映射，而不是把一切都交给随机瀑布流算法。",
@@ -316,7 +313,7 @@ const articleSeed = [
     readingTime: "4 分钟",
     coverAlt: "高对比黄黑视觉",
     categorySlug: "fashion",
-    tagSlugs: ["editorial-design", "culture-shift"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "品牌色如果只停留在 Logo 上，页面会很快失去识别度。QDaily 的黄黑色真正有效，是因为它参与了界面结构本身。",
       "因此我们在组件层也需要把这种颜色关系抽成 token，而不是在 CSS 里到处写字面量。",
@@ -335,7 +332,7 @@ const articleSeed = [
     readingTime: "5 分钟",
     coverAlt: "暗色娱乐版面",
     categorySlug: "entertainment",
-    tagSlugs: ["newsroom", "culture-shift"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "一张卡片真正的作用，不只是让用户点开自己，还要暗示下一张卡片也会有意思。这种期待感来自整体节奏，而不是单条内容。",
       "所以首页的信息组织必须像播放列表一样，内容之间彼此接力。",
@@ -354,7 +351,7 @@ const articleSeed = [
     readingTime: "6 分钟",
     coverAlt: "专题卡与杂志跨页",
     categorySlug: "culture",
-    tagSlugs: ["longform", "editorial-design", "newsroom"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "专题卡承担的是“解释这个站点是谁”的责任，它们需要更明显的排版重量、更大的呼吸感和更高的识别度。",
       "常规卡片则负责维持阅读流速，两者不能混成同一种声音，否则首屏会失去层次。",
@@ -373,7 +370,7 @@ const articleSeed = [
     readingTime: "6 分钟",
     coverAlt: "编辑系统与内容模型",
     categorySlug: "business",
-    tagSlugs: ["product-thinking", "newsroom", "editorial-design"],
+    tagSlugs: ["hao-wenzhang"],
     body: [
       "真正值得复用的是内容模型，而不是某一个页面截图。只要文章、分类、标签和首页编排之间的关系是稳定的，数据源随时可以替换。",
       "这也是为什么我们先做共享数据层，再做详情页和分类页模板。",
@@ -520,11 +517,11 @@ export const feedStories: Story[] = [...articles].sort(sortByPublishedAt).map((a
 export const footerColumns: SiteLink[][] = [
   [
     { label: "首页", href: "/" },
-    { label: "长文章", href: "/tags/longform" },
-    { label: "TOP 15", href: "/tags/top-15" },
-    { label: "10 个图", href: "/tags/ten-photos" },
+    { label: "好文章", href: "/tags/hao-wenzhang" },
+    { label: "好观点", href: "/tags/hao-guandian" },
+    { label: "好家伙", href: "/tags/hao-jiahuo" },
     { label: "好奇心研究所", href: "/labs" },
-    { label: "Medium", href: "/tags/editorial-design" },
+    { label: "好论文", href: "/tags/hao-lunwen" },
   ],
   [
     { label: "商业", href: "/categories/business" },

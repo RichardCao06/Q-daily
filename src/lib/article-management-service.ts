@@ -2,6 +2,7 @@ import { buildArticleMutation, type ArticleMutationInput, type ArticleStatus } f
 import { buildMarkdownImportPayload, deserializeStoredArticleBlock, deserializeStoredHeroImage } from "./markdown-import";
 import { loadMarkdownArticleSources, parseMarkdownArticle } from "./markdown-articles";
 import { getSupabaseServerClient } from "./supabase/server";
+import { buildNormalizedTagOptions, mapEditorTagSlugsToStored, mapStoredTagSlugsToEditor } from "./tag-taxonomy";
 
 type Option = {
   slug: string;
@@ -187,6 +188,7 @@ async function persistArticleRecords(
     }>;
   },
 ) {
+  const storedTagSlugs = mapEditorTagSlugsToStored(payload.tagSlugs);
   const articleResult = await db.from("articles").insert({
     slug: payload.article.slug,
     legacy_id: null,
@@ -224,9 +226,9 @@ async function persistArticleRecords(
     throw new Error(blocksResult.error.message);
   }
 
-  if (payload.tagSlugs.length > 0) {
+  if (storedTagSlugs.length > 0) {
     const tagsResult = await db.from("article_tags").insert(
-      payload.tagSlugs.map((tagSlug) => ({
+      storedTagSlugs.map((tagSlug) => ({
         article_slug: payload.article.slug,
         tag_slug: tagSlug,
       })),
@@ -251,6 +253,7 @@ async function replaceArticleRelations(
     }>;
   },
 ) {
+  const storedTagSlugs = mapEditorTagSlugsToStored(payload.tagSlugs);
   const [deleteBlocksResult, deleteTagsResult] = await Promise.all([
     db.from("article_blocks").delete().eq("article_slug", slug),
     db.from("article_tags").delete().eq("article_slug", slug),
@@ -275,9 +278,9 @@ async function replaceArticleRelations(
     }
   }
 
-  if (payload.tagSlugs.length > 0) {
+  if (storedTagSlugs.length > 0) {
     const tagsResult = await db.from("article_tags").insert(
-      payload.tagSlugs.map((tagSlug) => ({
+      storedTagSlugs.map((tagSlug) => ({
         article_slug: slug,
         tag_slug: tagSlug,
       })),
@@ -295,10 +298,9 @@ async function loadEditorOptions(
   // Temporary escape hatch until the Supabase types are regenerated for the new tables.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;
-  const [authorsResult, categoriesResult, tagsResult] = await Promise.all([
+  const [authorsResult, categoriesResult] = await Promise.all([
     db.from("authors").select("slug,name").order("name", { ascending: true }),
     db.from("categories").select("slug,name").order("name", { ascending: true }),
-    db.from("tags").select("slug,name").order("name", { ascending: true }),
   ]);
 
   return {
@@ -310,10 +312,7 @@ async function loadEditorOptions(
       slug: category.slug,
       name: category.name,
     })),
-    tags: ((tagsResult.data ?? []) as Option[]).map((tag) => ({
-      slug: tag.slug,
-      name: tag.name,
-    })),
+    tags: buildNormalizedTagOptions(),
   };
 }
 
@@ -476,7 +475,9 @@ export async function loadAdminArticleEditor(slug: string | null, accessToken?: 
       heroImageUrl: article.hero_image_url ?? fallbackHero?.src ?? "",
       heroImageCaption: article.hero_image_caption ?? fallbackHero?.caption ?? "",
       palette: article.palette,
-      tagSlugs: ((tagsResult.data ?? []) as Array<{ tag_slug: string }>).map((tag) => tag.tag_slug),
+      tagSlugs: mapStoredTagSlugsToEditor(
+        ((tagsResult.data ?? []) as Array<{ tag_slug: string }>).map((tag) => tag.tag_slug),
+      ),
       sourceMarkdown,
       status: article.status,
       publishedAt: article.published_at ?? "",

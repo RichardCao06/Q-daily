@@ -8,7 +8,7 @@ export default function LabsRoute() {
       title="好奇心研究所"
       description="这里用来承接实验性专题、编辑策划和更具概念性的内容集合。"
       actions={[
-        { label: "查看编辑设计", href: "/tags/editorial-design" },
+        { label: "查看好观点", href: "/tags/hao-guandian" },
         { label: "返回首页", href: "/" },
       ]}
       sections={[

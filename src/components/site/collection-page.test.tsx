@@ -22,21 +22,21 @@ describe("CollectionPage", () => {
   });
 
   it("renders a tag collection with the matching story cards", () => {
-    const tag = getTagBySlug("longform");
-    const stories = getArticlesByTag("longform");
+    const tag = getTagBySlug("hao-wenzhang");
+    const stories = getArticlesByTag("hao-wenzhang");
 
     expect(tag).toBeDefined();
 
-    render(<CollectionPage title={tag!.name} description="长文章标签页" stories={stories} />);
+    render(<CollectionPage title={tag!.name} description="好文章标签页" stories={stories} />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "长文章" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "好文章" })).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(stories.length);
   });
 
   it("renders card cover images when a story provides them", () => {
     const stories = [
       {
-        ...getArticlesByTag("longform")[0]!,
+        ...getArticlesByTag("hao-wenzhang")[0]!,
         heroImage: {
           src: "/editorial/avo-paper/paper-firstpage-1.png",
           alt: "AVO 论文首页",
@@ -44,7 +44,7 @@ describe("CollectionPage", () => {
       },
     ];
 
-    render(<CollectionPage title="长文章" description="长文章标签页" stories={stories} />);
+    render(<CollectionPage title="好文章" description="好文章标签页" stories={stories} />);
 
     expect(screen.getByAltText("AVO 论文首页")).toBeInTheDocument();
   });

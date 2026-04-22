@@ -21,6 +21,7 @@ import {
 } from "./qdaily-data";
 import type { Database } from "./supabase/database.types";
 import { getSupabaseServerClient } from "./supabase/server";
+import { buildNormalizedSiteTags, mapStoredTagSlugsToEditor } from "./tag-taxonomy";
 
 type SiteSnapshot = {
   articles: Article[];
@@ -41,7 +42,6 @@ export type SiteChromeData = {
 
 type AuthorRow = Database["public"]["Tables"]["authors"]["Row"];
 type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
-type TagRow = Database["public"]["Tables"]["tags"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type ArticleBlockRow = Database["public"]["Tables"]["article_blocks"]["Row"];
 type ArticleTagRow = Database["public"]["Tables"]["article_tags"]["Row"];
@@ -342,7 +342,6 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
 
   const authorRows = (authorsResult.data ?? []) as AuthorRow[];
   const categoryRows = (categoriesResult.data ?? []) as CategoryRow[];
-  const tagRows = (tagsResult.data ?? []) as TagRow[];
   const articleRows = (articlesResult.data ?? []) as ArticleRow[];
   const blockRows = (blocksResult.data ?? []) as ArticleBlockRow[];
   const articleTagRows = (articleTagsResult.data ?? []) as ArticleTagRow[];
@@ -353,15 +352,11 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
     name: category.name,
     href: `/categories/${category.slug}`,
   }));
-  const tags = tagRows.map((tag) => ({
-    slug: tag.slug,
-    name: tag.name,
-    href: `/tags/${tag.slug}`,
-  }));
+  const tags = buildNormalizedSiteTags();
 
   const authorsBySlug = new Map(authorRows.map((author) => [author.slug, author.name]));
   const categoriesBySlug = new Map(categories.map((category) => [category.slug, category]));
-  const tagsBySlug = new Map(tags.map((tag) => [tag.slug, tag]));
+  const tagsBySlug = new Map<string, SiteTag>(tags.map((tag) => [tag.slug, tag]));
   const articleBlocksBySlug = new Map<string, ArticleLongformBlock[]>();
   const articleHeroImagesBySlug = new Map<string, NonNullable<Article["heroImage"]>>();
   const articleTagsBySlug = new Map<string, string[]>();
@@ -405,7 +400,7 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
         return [];
       }
 
-      const resolvedTags = (articleTagsBySlug.get(article.slug) ?? [])
+      const resolvedTags = mapStoredTagSlugsToEditor(articleTagsBySlug.get(article.slug) ?? [])
         .map((tagSlug) => tagsBySlug.get(tagSlug))
         .filter((tag): tag is SiteTag => Boolean(tag));
 

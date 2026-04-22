@@ -29,7 +29,7 @@ describe("article management helpers", () => {
       heroImageUrl: "https://cdn.example.com/articles/new-editorial-story/hero.jpg",
       heroImageCaption: "图注：新的头图。",
       palette: "linear-gradient(135deg, #111 0%, #333 100%)",
-      tagSlugs: ["newsroom", "product-thinking"],
+      tagSlugs: ["hao-wenzhang", "hao-guandian"],
       sourceMarkdown: "## 第一节\n\n第一段。\n\n![配图](https://cdn.example.com/articles/new-editorial-story/inline-1.jpg)\n\n*图注：配图说明。*",
       status: "draft",
       publishedAt: "",
@@ -42,7 +42,7 @@ describe("article management helpers", () => {
     expect(payload.article.heroImageUrl).toBe("https://cdn.example.com/articles/new-editorial-story/hero.jpg");
     expect(payload.article.heroImageCaption).toBe("图注：新的头图。");
     expect(payload.article.sourceMarkdown).toContain("## 第一节");
-    expect(payload.tagSlugs).toEqual(["newsroom", "product-thinking"]);
+    expect(payload.tagSlugs).toEqual(["hao-wenzhang", "hao-guandian"]);
     expect(payload.blocks).toEqual([
       { type: "heading", level: 2, content: "第一节" },
       { type: "paragraph", content: "第一段。" },

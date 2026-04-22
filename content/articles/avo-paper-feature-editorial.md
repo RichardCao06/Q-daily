@@ -6,7 +6,7 @@ publishedAt: 2026-04-08T10:00:00+08:00
 author: Richard Cao
 readingTime: 10 分钟
 category: smart
-tags: longform, product-thinking, newsroom
+tags: hao-wenzhang
 palette: linear-gradient(135deg, #0d1118 0%, #224b8f 50%, #8cb8ff 100%)
 coverAlt: NVIDIA AVO 论文首页
 heroImage: /editorial/avo-paper/paper-firstpage-1.png

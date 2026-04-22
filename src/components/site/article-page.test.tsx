@@ -40,7 +40,7 @@ publishedAt: 2026-03-30T10:00:00+08:00
 author: Richard Cao
 readingTime: 9 分钟
 category: business
-tags: longform, culture-shift, newsroom
+tags: hao-wenzhang
 palette: linear-gradient(135deg, #111 0%, #333 100%)
 coverAlt: WSBK 葡萄牙站庆祝现场
 heroImage: /editorial/zhangxue/hero-media-news-1.jpg
@@ -81,7 +81,7 @@ publishedAt: 2026-04-20T09:00:00+08:00
 author: Richard Cao
 readingTime: 8 分钟
 category: business
-tags: longform, culture-shift
+tags: hao-wenzhang
 palette: linear-gradient(135deg, #111 0%, #333 100%)
 coverAlt: 奖励黑客标题卡
 heroImage: https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png

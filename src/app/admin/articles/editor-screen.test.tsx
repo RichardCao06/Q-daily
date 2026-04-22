@@ -133,9 +133,9 @@ describe("AdminArticleEditorScreen", () => {
               },
               tags: [
                 {
-                  slug: "longform",
-                  name: "长文章",
-                  href: "/tags/longform",
+                  slug: "hao-wenzhang",
+                  name: "好文章",
+                  href: "/tags/hao-wenzhang",
                 },
               ],
               coverAlt: "张雪",
@@ -168,7 +168,7 @@ describe("AdminArticleEditorScreen", () => {
 
     const file = new File(
       [
-        "---\nslug: zhangxue-profile-editorial-reillustrated\ntitle: 张雪\nexcerpt: 摘要\ncategory: business\ntags: longform\npublishedAt: 2026-04-16T09:00:00.000Z\npalette: linear-gradient(135deg, #111 0%, #333 100%)\nauthor: Richard Cao\nreadingTime: 6 分钟\ncoverAlt: 张雪\nheroImage: https://cdn.example.com/hero.jpg\n---\n\n第一段。",
+        "---\nslug: zhangxue-profile-editorial-reillustrated\ntitle: 张雪\nexcerpt: 摘要\ncategory: business\ntags: hao-wenzhang\npublishedAt: 2026-04-16T09:00:00.000Z\npalette: linear-gradient(135deg, #111 0%, #333 100%)\nauthor: Richard Cao\nreadingTime: 6 分钟\ncoverAlt: 张雪\nheroImage: https://cdn.example.com/hero.jpg\n---\n\n第一段。",
       ],
       "zhangxue.md",
       { type: "text/markdown" },
@@ -195,7 +195,7 @@ describe("AdminArticleEditorScreen", () => {
         },
         body: JSON.stringify({
           markdown:
-            "---\nslug: zhangxue-profile-editorial-reillustrated\ntitle: 张雪\nexcerpt: 摘要\ncategory: business\ntags: longform\npublishedAt: 2026-04-16T09:00:00.000Z\npalette: linear-gradient(135deg, #111 0%, #333 100%)\nauthor: Richard Cao\nreadingTime: 6 分钟\ncoverAlt: 张雪\nheroImage: https://cdn.example.com/hero.jpg\n---\n\n第一段。",
+            "---\nslug: zhangxue-profile-editorial-reillustrated\ntitle: 张雪\nexcerpt: 摘要\ncategory: business\ntags: hao-wenzhang\npublishedAt: 2026-04-16T09:00:00.000Z\npalette: linear-gradient(135deg, #111 0%, #333 100%)\nauthor: Richard Cao\nreadingTime: 6 分钟\ncoverAlt: 张雪\nheroImage: https://cdn.example.com/hero.jpg\n---\n\n第一段。",
           authorSlug: "richard-cao",
         }),
       });
@@ -218,7 +218,7 @@ describe("AdminArticleEditorScreen", () => {
         },
         body: JSON.stringify({
           markdown:
-            "---\nslug: zhangxue-profile-editorial-reillustrated\ntitle: 张雪\nexcerpt: 摘要\ncategory: business\ntags: longform\npublishedAt: 2026-04-16T09:00:00.000Z\npalette: linear-gradient(135deg, #111 0%, #333 100%)\nauthor: Richard Cao\nreadingTime: 6 分钟\ncoverAlt: 张雪\nheroImage: https://cdn.example.com/hero.jpg\n---\n\n第一段。",
+            "---\nslug: zhangxue-profile-editorial-reillustrated\ntitle: 张雪\nexcerpt: 摘要\ncategory: business\ntags: hao-wenzhang\npublishedAt: 2026-04-16T09:00:00.000Z\npalette: linear-gradient(135deg, #111 0%, #333 100%)\nauthor: Richard Cao\nreadingTime: 6 分钟\ncoverAlt: 张雪\nheroImage: https://cdn.example.com/hero.jpg\n---\n\n第一段。",
           authorSlug: "richard-cao",
           status: "published",
         }),

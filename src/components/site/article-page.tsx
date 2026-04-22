@@ -40,7 +40,7 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
           <nav className={styles.nav} aria-label="文章页导航">
             <Link href="/">首页</Link>
             <Link href={article.category.href}>{article.category.name}</Link>
-            <Link href="/tags/longform">长文章</Link>
+            <Link href="/tags/hao-wenzhang">好文章</Link>
             <Link href="/search">搜索</Link>
           </nav>
         </div>

@@ -14,7 +14,7 @@ describe("qdaily data layer", () => {
     expect(article).toBeDefined();
     expect(article?.title).toContain("品牌封面");
     expect(article?.category.slug).toBe("business");
-    expect(article?.tags.map((tag) => tag.slug)).toContain("editorial-design");
+    expect(article?.tags.map((tag) => tag.slug)).toEqual(["hao-wenzhang"]);
   });
 
   it("filters category pages with the newest stories first", () => {
@@ -28,12 +28,12 @@ describe("qdaily data layer", () => {
   });
 
   it("filters tag pages by shared editorial theme", () => {
-    const tag = siteTags.find((item) => item.slug === "editorial-design");
-    const stories = getArticlesByTag("editorial-design");
+    const tag = siteTags.find((item) => item.slug === "hao-wenzhang");
+    const stories = getArticlesByTag("hao-wenzhang");
 
     expect(tag).toBeDefined();
     expect(stories.length).toBeGreaterThanOrEqual(3);
-    expect(stories.every((story) => story.tags.some((storyTag) => storyTag.slug === "editorial-design"))).toBe(true);
+    expect(stories.every((story) => story.tags.some((storyTag) => storyTag.slug === "hao-wenzhang"))).toBe(true);
   });
 
   it("returns related stories without the current article", () => {

@@ -12,7 +12,7 @@ publishedAt: 2026-03-30T10:00:00+08:00
 author: Richard Cao
 readingTime: 9 分钟
 category: business
-tags: longform, culture-shift, newsroom
+tags: hao-wenzhang
 palette: linear-gradient(135deg, #111 0%, #333 100%)
 coverAlt: WSBK 葡萄牙站庆祝现场
 heroImage: /editorial/zhangxue/hero-media-news-1.jpg
@@ -31,7 +31,7 @@ heroCaption: 图注：WSBK 葡萄牙站夺冠后的庆祝现场。
 
     expect(article.slug).toBe("zhangxue-profile-editorial-reillustrated");
     expect(article.category.slug).toBe("business");
-    expect(article.tags.map((tag) => tag.slug)).toEqual(["longform", "culture-shift", "newsroom"]);
+    expect(article.tags.map((tag) => tag.slug)).toEqual(["hao-wenzhang"]);
     expect(article.layout).toBe("longform");
     expect(article.heroImage?.src).toBe("/editorial/zhangxue/hero-media-news-1.jpg");
     expect(article.heroImage?.caption).toContain("WSBK 葡萄牙站");

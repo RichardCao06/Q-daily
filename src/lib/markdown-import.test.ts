@@ -13,7 +13,7 @@ publishedAt: 2026-04-07T18:00:00+08:00
 author: Richard Cao
 readingTime: 9 分钟
 category: culture
-tags: longform, culture-shift, newsroom
+tags: hao-wenzhang
 palette: linear-gradient(135deg, #4f392d 0%, #8d684f 48%, #d4b58f 100%)
 coverAlt: 何琼与张雪的合影
 heroImage: /editorial/heqiong-profile/hero-heqiong-1.jpg
@@ -37,7 +37,7 @@ heroCaption: 图注：何琼与张雪的合影。
     expect(payload.article.sourceMarkdown).toContain("她是张雪的母亲。");
     expect(payload.article.heroImageUrl).toBe("/editorial/heqiong-profile/hero-heqiong-1.jpg");
     expect(payload.article.heroImageCaption).toBe("图注：何琼与张雪的合影。");
-    expect(payload.tagSlugs).toEqual(["longform", "culture-shift", "newsroom"]);
+    expect(payload.tagSlugs).toEqual(["hao-wenzhang"]);
     expect(payload.blocks).toEqual([
       expect.objectContaining({ position: 1, kind: "heading" }),
       expect.objectContaining({ position: 2, kind: "paragraph", content: "她是张雪的母亲。" }),
