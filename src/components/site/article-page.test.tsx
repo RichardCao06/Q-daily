@@ -11,14 +11,17 @@ describe("ArticlePage", () => {
 
     expect(article).toBeDefined();
 
-    render(<ArticlePage article={article!} />);
+    const { container } = render(<ArticlePage article={article!} />);
+    const guideCopy = container.querySelector('div[class*="storyGuide"] p');
 
     expect(screen.getByRole("heading", { level: 1, name: article!.title })).toBeInTheDocument();
     expect(screen.getByText(article!.author)).toBeInTheDocument();
     expect(screen.getByText("导读")).toBeInTheDocument();
+    expect(guideCopy).toHaveTextContent(article!.body[0]!);
+    expect(screen.queryByText("把重要观点先轻轻放在前面，像策展说明一样，为读者建立进入文章的第一层语境。")).not.toBeInTheDocument();
     expect(screen.getByText("摘录")).toBeInTheDocument();
     expect(screen.getByText("延伸阅读索引")).toBeInTheDocument();
-    expect(screen.getAllByText(article!.body[0]!)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(article!.body[0]!)).toHaveLength(1);
     expect(screen.getByRole("button", { name: /点赞/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /收藏/ })).toBeInTheDocument();
     expect(screen.getByText("评论会在审核通过后公开显示。")).toBeInTheDocument();
@@ -54,14 +57,17 @@ heroCaption: 图注：WSBK 葡萄牙站夺冠后的庆祝现场。
 
 它真正难的不是做出第一辆车，而是把一套方法持续做下去。`);
 
-    render(<ArticlePage article={article} relatedStories={[]} />);
+    const { container } = render(<ArticlePage article={article} relatedStories={[]} />);
+    const guideCopy = container.querySelector('div[class*="storyGuide"] p');
 
     expect(screen.getByRole("heading", { level: 1, name: article.title })).toBeInTheDocument();
     expect(screen.getByText("导读")).toBeInTheDocument();
+    expect(guideCopy).toHaveTextContent("很多人先认识张雪，不是因为一辆车。");
+    expect(screen.queryByText("把重要观点先轻轻放在前面，像策展说明一样，为读者建立进入文章的第一层语境。")).not.toBeInTheDocument();
     expect(screen.getByText("摘录")).toBeInTheDocument();
     expect(screen.getByText("登录后参与评论")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "先被认识的，往往不是车" })).toBeInTheDocument();
-    expect(screen.getByText("很多人先认识张雪，不是因为一辆车。")).toBeInTheDocument();
+    expect(screen.getAllByText("很多人先认识张雪，不是因为一辆车。")).toHaveLength(1);
     expect(screen.getByAltText("500RR")).toBeInTheDocument();
     expect(screen.getByText("图注：500RR 官方产品图。")).toBeInTheDocument();
   });

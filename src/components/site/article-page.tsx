@@ -13,7 +13,6 @@ type ArticlePageProps = {
 };
 
 export function ArticlePage({ article, relatedStories = getRelatedArticles(article.slug, 4) }: ArticlePageProps) {
-  const highlightedQuote = article.body[1] ?? article.excerpt;
   const storyBlocks =
     article.longformBlocks && article.longformBlocks.length > 0
       ? article.longformBlocks
@@ -21,6 +20,11 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
           type: "paragraph" as const,
           content: paragraph,
         }));
+  const paragraphBlocks = storyBlocks.flatMap((block) => (block.type === "paragraph" ? [block] : []));
+  const guideBlockIndex = storyBlocks.findIndex((block) => block.type === "paragraph");
+  const guideCopy = paragraphBlocks[0]?.content ?? article.excerpt;
+  const remainingStoryBlocks = guideBlockIndex >= 0 ? storyBlocks.filter((_, index) => index !== guideBlockIndex) : storyBlocks;
+  const highlightedQuote = paragraphBlocks[1]?.content ?? paragraphBlocks[0]?.content ?? article.excerpt;
 
   return (
     <div className={styles.page}>
@@ -56,7 +60,7 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
                 <h1 className={styles.storyTitle}>{article.title}</h1>
                 <div className={styles.storyGuide}>
                   <span>导读</span>
-                  <p>把重要观点先轻轻放在前面，像策展说明一样，为读者建立进入文章的第一层语境。</p>
+                  <p>{guideCopy}</p>
                 </div>
                 <p className={styles.storyExcerpt}>{article.excerpt}</p>
                 <aside className={styles.storyQuote} aria-label="文章摘录">
@@ -91,7 +95,7 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
               </header>
 
               <section className={styles.storyBody}>
-                {storyBlocks.map((block, index) => {
+                {remainingStoryBlocks.map((block, index) => {
                   if (block.type === "paragraph") {
                     return <p key={`${block.type}-${index}`}>{block.content}</p>;
                   }
