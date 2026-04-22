@@ -174,7 +174,16 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
               return (
                 <article key={story.slug} className={`${styles.relatedCard} ${index === 0 ? styles.relatedWide : ""}`.trim()}>
                   <Link href={`/articles/${story.slug}`}>
-                    <div className={styles.relatedVisual} style={cardStyle} />
+                    <div className={styles.relatedVisual} style={cardStyle}>
+                      {story.heroImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          className={styles.relatedCover}
+                          src={resolvePreferredEditorialAsset(story.heroImage.src)}
+                          alt={story.heroImage.alt}
+                        />
+                      ) : null}
+                    </div>
                     <div className={styles.relatedBody}>
                       <span>{story.category.name}</span>
                       <h3>{story.title}</h3>

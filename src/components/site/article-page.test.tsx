@@ -97,4 +97,25 @@ heroCaption: 图注：标题卡应优先显示宽版 SVG。
       "/editorial/reward-hacking-gradient/process-grift-pipeline-1.svg",
     );
   });
+
+  it("renders related story cover images when related articles provide hero images", () => {
+    const article = getArticleBySlug("rebuild-a-newsroom-wall")!;
+    const relatedStory = {
+      ...article,
+      id: "related-story-with-image",
+      slug: "related-editorial-story",
+      title: "带头图的相关阅读",
+      heroImage: {
+        src: "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/gemini-robotics-er16-facility-feature-editorial/hero/cover-gemini-robotics-er16-title-card.png",
+        alt: "相关阅读封面",
+      },
+    };
+
+    render(<ArticlePage article={article} relatedStories={[relatedStory]} />);
+
+    expect(screen.getByAltText("相关阅读封面")).toHaveAttribute(
+      "src",
+      "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/gemini-robotics-er16-facility-feature-editorial/hero/cover-gemini-robotics-er16-title-card.png",
+    );
+  });
 });
