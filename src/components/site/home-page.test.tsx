@@ -210,4 +210,15 @@ describe("HomePage", () => {
     expect(screen.getByText("同步于 04 / 18")).toBeInTheDocument();
     expect(screen.queryByText("更新于 03 / 30")).not.toBeInTheDocument();
   });
+
+  it("renders the latest module story title as a heading for constrained editorial typography", () => {
+    render(<HomePage data={homePageData} />);
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: sideFeatures[0]!.title,
+      }),
+    ).toBeInTheDocument();
+  });
 });

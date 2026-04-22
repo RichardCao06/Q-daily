@@ -104,7 +104,7 @@ function LatestModule({
           <span>{latestStory.category}</span>
           <span>{meta.statusLabel}</span>
         </div>
-        <div className={styles.latestDigits}>{latestStory.title}</div>
+        <h2 className={styles.latestDigits}>{latestStory.title}</h2>
         <p className={styles.latestCopy}>{latestStory.excerpt}</p>
         {formattedLatestPublishedAt ? (
           <div className={styles.latestFooter}>
