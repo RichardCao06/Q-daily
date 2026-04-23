@@ -399,8 +399,7 @@ const sortByPublishedAt = (left: Article, right: Article) =>
   new Date(right.publishedAt.replace(" ", "T")).getTime() - new Date(left.publishedAt.replace(" ", "T")).getTime();
 
 export const channelLinks: SiteLink[] = [
-  ...siteTags.slice(0, 3).map((item) => ({ label: item.name, href: item.href })),
-  ...siteCategories.map((item) => ({ label: item.name, href: item.href })),
+  ...siteTags.map((item) => ({ label: item.name, href: item.href })),
 ];
 
 export const mainCategories = channelLinks.map((item) => item.label);

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import { channelLinks, defaultHomePageCopy, featurePanels, feedStories, footerColumns, primaryLinks, sideFeatures, spotlightStory, utilityLinks } from "@/lib/qdaily-data";
 
@@ -41,6 +41,11 @@ describe("HomePage", () => {
       feedStories.length + sideFeatures.length + featurePanels.length + 1,
     );
     expect(screen.getAllByRole("contentinfo").at(-1)).toHaveTextContent("下载 APP");
+    const banner = screen.getByRole("banner");
+    const channelNav = within(banner).getByRole("navigation", { name: "频道导航" });
+    expect(within(channelNav).getByRole("link", { name: "好文章" })).toBeInTheDocument();
+    expect(within(channelNav).getByRole("link", { name: "好观点" })).toBeInTheDocument();
+    expect(within(channelNav).queryByRole("link", { name: "商业" })).not.toBeInTheDocument();
   });
 
   it("renders article cover images on cards when the content source provides them", () => {

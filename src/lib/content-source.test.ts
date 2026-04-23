@@ -1,5 +1,5 @@
-import { articles, defaultHomePageCopy } from "./qdaily-data";
-import { buildAutomaticHomepageModules, getHomePageData, mapHomepageModules } from "./content-source";
+import { articles, defaultHomePageCopy, siteCategories, siteTags } from "./qdaily-data";
+import { buildAutomaticHomepageModules, buildSiteChromeData, getHomePageData, mapHomepageModules } from "./content-source";
 
 describe("content source", () => {
   const previousUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -195,5 +195,13 @@ describe("content source", () => {
         copyright: "2026 Supabase-driven QDaily",
       },
     });
+  });
+
+  it("builds top channel navigation from tags only while keeping categories in the footer", () => {
+    const chrome = buildSiteChromeData(siteCategories, siteTags);
+
+    expect(chrome.channelLinks.map((item) => item.label)).toEqual(["好文章", "好观点", "好家伙", "好论文"]);
+    expect(chrome.channelLinks.some((item) => item.label === "商业")).toBe(false);
+    expect(chrome.footerColumns[1]?.some((item) => item.label === "商业")).toBe(true);
   });
 });

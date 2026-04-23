@@ -87,10 +87,7 @@ function buildFeedStories(siteArticles: Article[]): Story[] {
 }
 
 export function buildSiteChromeData(categories: SiteCategory[], tags: SiteTag[]): SiteChromeData {
-  const channelLinks = [
-    ...tags.slice(0, 3).map((item) => ({ label: item.name, href: item.href })),
-    ...categories.map((item) => ({ label: item.name, href: item.href })),
-  ];
+  const channelLinks = [...tags.map((item) => ({ label: item.name, href: item.href }))];
 
   return {
     channelLinks,
@@ -99,7 +96,7 @@ export function buildSiteChromeData(categories: SiteCategory[], tags: SiteTag[])
     footerColumns: [
       [
         { label: "首页", href: "/" },
-        ...tags.slice(0, 3).map((item) => ({ label: item.name, href: item.href })),
+        ...tags.map((item) => ({ label: item.name, href: item.href })),
         { label: "好奇心研究所", href: "/labs" },
         { label: "栏目中心", href: "/special-columns" },
       ],
