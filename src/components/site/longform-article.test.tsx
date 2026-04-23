@@ -62,4 +62,30 @@ describe("LongformArticlePage", () => {
     expect(firstParagraph.compareDocumentPosition(inlineImage) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(inlineImage.compareDocumentPosition(sectionHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+  it("keeps Supabase storage urls unchanged for hero and inline images", () => {
+    render(
+      <LongformArticlePage
+        article={{
+          ...article,
+          heroImage: {
+            src: "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png",
+            alt: "Reward hacking 标题卡",
+            caption: "图注：标题卡。",
+          },
+          longformBlocks: [
+            {
+              type: "image",
+              src: "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/inline/process-grift-pipeline-1.png",
+              alt: "投机路径图",
+              caption: "图注：路径图。",
+            },
+          ],
+        }}
+        relatedStories={[]}
+      />,
+    );
+
+    expect(screen.getByAltText("Reward hacking 标题卡")).toHaveAttribute("src", "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png");
+    expect(screen.getByAltText("投机路径图")).toHaveAttribute("src", "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/inline/process-grift-pipeline-1.png");
+  });
 });

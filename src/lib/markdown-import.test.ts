@@ -4,6 +4,8 @@ import { buildMarkdownImportPayload, deserializeStoredArticleBlock, serializeArt
 
 describe("markdown import", () => {
   it("builds a Supabase-ready payload from markdown with rich blocks", () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://trwasyzmcfcsjvcjndrm.supabase.co";
+
     const payload = buildMarkdownImportPayload(
       `---
 title: 她没有一直陪在张雪身边，但在最难的时候托住了他
@@ -35,13 +37,20 @@ heroCaption: 图注：何琼与张雪的合影。
     expect(payload.article.categorySlug).toBe("culture");
     expect(payload.article.status).toBe("published");
     expect(payload.article.sourceMarkdown).toContain("她是张雪的母亲。");
-    expect(payload.article.heroImageUrl).toBe("/editorial/heqiong-profile/hero-heqiong-1.jpg");
+    expect(payload.article.heroImageUrl).toBe(
+      "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/heqiong-profile-editorial/hero/hero-heqiong-1.jpg",
+    );
     expect(payload.article.heroImageCaption).toBe("图注：何琼与张雪的合影。");
     expect(payload.tagSlugs).toEqual(["hao-wenzhang"]);
     expect(payload.blocks).toEqual([
       expect.objectContaining({ position: 1, kind: "heading" }),
       expect.objectContaining({ position: 2, kind: "paragraph", content: "她是张雪的母亲。" }),
-      expect.objectContaining({ position: 3, kind: "image" }),
+      expect.objectContaining({
+        position: 3,
+        kind: "image",
+        content:
+          "{\"src\":\"https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/heqiong-profile-editorial/inline/archive-note-1.jpg\",\"alt\":\"张雪写给母亲的手写页\",\"caption\":\"图注：张雪写给母亲的手写页。\"}",
+      }),
     ]);
   });
 

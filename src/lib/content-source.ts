@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { isPublishedStatus } from "./article-management";
+import { normalizeArticleMediaUrl } from "./editorial-media";
 import { deserializeStoredArticleBlock, deserializeStoredHeroImage } from "./markdown-import";
 import {
   defaultHomePageCopy,
@@ -402,6 +403,36 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
         .filter((tag): tag is SiteTag => Boolean(tag));
 
       const resolvedBlocks = articleBlocksBySlug.get(article.slug) ?? [];
+      const normalizedBlocks = resolvedBlocks.map((block) =>
+        block.type === "image"
+          ? {
+              ...block,
+              src: normalizeArticleMediaUrl(block.src, {
+                articleSlug: article.slug,
+                kind: "inline",
+              }),
+            }
+          : block,
+      );
+      const fallbackHeroImage = articleHeroImagesBySlug.get(article.slug);
+      const normalizedHeroImage = article.hero_image_url
+        ? {
+            src: normalizeArticleMediaUrl(article.hero_image_url, {
+              articleSlug: article.slug,
+              kind: "hero",
+            }),
+            alt: article.cover_alt,
+            caption: article.hero_image_caption ?? undefined,
+          }
+        : fallbackHeroImage
+          ? {
+              ...fallbackHeroImage,
+              src: normalizeArticleMediaUrl(fallbackHeroImage.src, {
+                articleSlug: article.slug,
+                kind: "hero",
+              }),
+            }
+          : undefined;
 
       return [{
         id: article.legacy_id ?? article.slug,
@@ -415,18 +446,12 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
         author: authorsBySlug.get(article.author_slug) ?? article.author_slug,
         readingTime: article.reading_time,
         coverAlt: article.cover_alt,
-        body: resolvedBlocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
+        body: normalizedBlocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
         category,
         tags: resolvedTags,
         source: "supabase",
-        heroImage: article.hero_image_url
-          ? {
-              src: article.hero_image_url,
-              alt: article.cover_alt,
-              caption: article.hero_image_caption ?? undefined,
-            }
-          : articleHeroImagesBySlug.get(article.slug),
-        longformBlocks: resolvedBlocks.length > 0 ? resolvedBlocks : undefined,
+        heroImage: normalizedHeroImage,
+        longformBlocks: normalizedBlocks.length > 0 ? normalizedBlocks : undefined,
       } satisfies Article];
     });
 

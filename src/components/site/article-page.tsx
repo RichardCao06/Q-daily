@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
-import { resolvePreferredEditorialAsset } from "@/lib/editorial-media";
 import { getRelatedArticles, type Article } from "@/lib/qdaily-data";
 
 import { ArticleEngagement } from "./article-engagement";
@@ -77,7 +76,7 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
                 {article.heroImage ? (
                   <figure className={styles.storyMedia}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className={styles.storyImage} src={resolvePreferredEditorialAsset(article.heroImage.src)} alt={article.heroImage.alt} />
+                    <img className={styles.storyImage} src={article.heroImage.src} alt={article.heroImage.alt} />
                     {article.heroImage.caption ? <figcaption className={styles.storyCaption}>{article.heroImage.caption}</figcaption> : null}
                   </figure>
                 ) : (
@@ -113,7 +112,7 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
                   return (
                     <figure key={`${block.type}-${index}`} className={styles.storyMedia}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img className={styles.storyImage} src={resolvePreferredEditorialAsset(block.src)} alt={block.alt} />
+                      <img className={styles.storyImage} src={block.src} alt={block.alt} />
                       {block.caption ? <figcaption className={styles.storyCaption}>{block.caption}</figcaption> : null}
                     </figure>
                   );
@@ -181,11 +180,7 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
                     <div className={styles.relatedVisual} style={cardStyle}>
                       {story.heroImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          className={styles.relatedCover}
-                          src={resolvePreferredEditorialAsset(story.heroImage.src)}
-                          alt={story.heroImage.alt}
-                        />
+                        <img className={styles.relatedCover} src={story.heroImage.src} alt={story.heroImage.alt} />
                       ) : null}
                     </div>
                     <div className={styles.relatedBody}>

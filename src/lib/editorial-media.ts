@@ -1,43 +1,49 @@
-import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-function collectSvgAssets(directory: string, rootDirectory = directory, accumulator = new Map<string, string>()) {
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.name.startsWith(".")) {
-      continue;
-    }
+type ArticleMediaKind = "hero" | "inline";
 
-    const fullPath = path.join(directory, entry.name);
+const ARTICLE_MEDIA_BUCKET = "article-media";
 
-    if (entry.isDirectory()) {
-      collectSvgAssets(fullPath, rootDirectory, accumulator);
-      continue;
-    }
-
-    if (entry.isFile() && entry.name.endsWith(".svg")) {
-      const relativePath = path.relative(rootDirectory, fullPath).split(path.sep).join("/");
-      accumulator.set(entry.name, `/editorial/${relativePath}`);
-    }
-  }
-
-  return accumulator;
+function trimTrailingSlash(value: string) {
+  return value.replace(/\/+$/u, "");
 }
 
-const editorialSvgDirectory = path.join(process.cwd(), "public", "editorial");
-const editorialSvgAssets = existsSync(editorialSvgDirectory) ? collectSvgAssets(editorialSvgDirectory) : new Map<string, string>();
+function encodePathSegment(value: string) {
+  return encodeURIComponent(value).replace(/%2F/gu, "/");
+}
 
-export function resolvePreferredEditorialAsset(src: string) {
-  if (!src.endsWith(".png")) {
+export function buildSupabaseArticleMediaUrl(
+  articleSlug: string,
+  kind: ArticleMediaKind,
+  fileName: string,
+  baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL,
+) {
+  if (!baseUrl) {
+    return null;
+  }
+
+  return `${trimTrailingSlash(baseUrl)}/storage/v1/object/public/${ARTICLE_MEDIA_BUCKET}/articles/${encodePathSegment(articleSlug)}/${kind}/${encodePathSegment(fileName)}`;
+}
+
+export function normalizeArticleMediaUrl(
+  src: string,
+  options: {
+    articleSlug?: string;
+    kind?: ArticleMediaKind;
+    baseUrl?: string;
+  } = {},
+) {
+  if (!src || /^https?:\/\//u.test(src)) {
     return src;
   }
 
-  if (src.startsWith("/editorial/")) {
-    const svgSrc = src.replace(/\.png$/u, ".svg");
-    const svgPath = path.join(process.cwd(), "public", svgSrc);
-
-    return existsSync(svgPath) ? svgSrc : src;
+  if (!src.startsWith("/editorial/")) {
+    return src;
   }
 
-  const svgFileName = path.basename(src).replace(/\.png$/u, ".svg");
-  return editorialSvgAssets.get(svgFileName) ?? src;
+  if (!options.articleSlug || !options.kind) {
+    return src;
+  }
+
+  return buildSupabaseArticleMediaUrl(options.articleSlug, options.kind, path.basename(src), options.baseUrl) ?? src;
 }

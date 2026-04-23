@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { normalizeArticleMediaUrl } from "./editorial-media";
 import { getCategoryBySlug, getTagBySlug, type Article, type ArticleLongformBlock } from "./qdaily-data";
 
 const defaultDirectory = path.join(process.cwd(), "content", "articles");
@@ -131,6 +132,7 @@ function requireField(frontmatter: Frontmatter, key: string) {
 
 export function parseMarkdownArticle(source: string): Article {
   const { frontmatter, body } = parseFrontmatter(source);
+  const slug = requireField(frontmatter, "slug");
   const categorySlug = requireField(frontmatter, "category");
   const category = getCategoryBySlug(categorySlug);
 
@@ -151,10 +153,21 @@ export function parseMarkdownArticle(source: string): Article {
   });
 
   const blocks = parseMarkdownBody(body);
+  const normalizedBlocks = blocks.map((block) =>
+    block.type === "image"
+      ? {
+          ...block,
+          src: normalizeArticleMediaUrl(block.src, {
+            articleSlug: slug,
+            kind: "inline",
+          }),
+        }
+      : block,
+  );
 
   return {
-    id: requireField(frontmatter, "slug"),
-    slug: requireField(frontmatter, "slug"),
+    id: slug,
+    slug,
     title: requireField(frontmatter, "title"),
     excerpt: requireField(frontmatter, "excerpt"),
     publishedAt: requireField(frontmatter, "publishedAt").replace("T", " ").slice(0, 16),
@@ -164,17 +177,20 @@ export function parseMarkdownArticle(source: string): Article {
     author: requireField(frontmatter, "author"),
     readingTime: requireField(frontmatter, "readingTime"),
     coverAlt: requireField(frontmatter, "coverAlt"),
-    body: blocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
+    body: normalizedBlocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
     category,
     tags,
     layout: "longform",
     source: "markdown",
     heroImage: {
-      src: requireField(frontmatter, "heroImage"),
+      src: normalizeArticleMediaUrl(requireField(frontmatter, "heroImage"), {
+        articleSlug: slug,
+        kind: "hero",
+      }),
       alt: requireField(frontmatter, "coverAlt"),
       caption: frontmatter.heroCaption?.trim() || undefined,
     },
-    longformBlocks: blocks,
+    longformBlocks: normalizedBlocks,
   };
 }
 

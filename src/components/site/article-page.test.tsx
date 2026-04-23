@@ -72,11 +72,11 @@ heroCaption: 图注：WSBK 葡萄牙站夺冠后的庆祝现场。
     expect(screen.getByText("图注：500RR 官方产品图。")).toBeInTheDocument();
   });
 
-  it("prefers local svg assets when editorial storage images point at legacy png files", () => {
+  it("keeps Supabase storage urls unchanged for article hero and inline images", () => {
     const article = parseMarkdownArticle(`---
 title: 奖励黑客的渐变幻觉
 slug: reward-hacking-gradient-feature-editorial
-excerpt: 用一张更宽的标题卡验证页面优先选择本地 SVG。
+excerpt: 用一张标题卡验证页面直接渲染 Supabase 图片地址。
 publishedAt: 2026-04-20T09:00:00+08:00
 author: Richard Cao
 readingTime: 8 分钟
@@ -85,22 +85,22 @@ tags: hao-wenzhang
 palette: linear-gradient(135deg, #111 0%, #333 100%)
 coverAlt: 奖励黑客标题卡
 heroImage: https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png
-heroCaption: 图注：标题卡应优先显示宽版 SVG。
+heroCaption: 图注：标题卡直接使用 Supabase 地址。
 ---
 
 ![流程图](https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/inline/process-grift-pipeline-1.png)
 
-*图注：流程图也应回退到本地 SVG。*`);
+*图注：流程图也直接使用 Supabase 地址。*`);
 
     render(<ArticlePage article={article} relatedStories={[]} />);
 
     expect(screen.getByAltText("奖励黑客标题卡")).toHaveAttribute(
       "src",
-      "/editorial/reward-hacking-gradient/cover-reward-hacking-title-card.svg",
+      "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png",
     );
     expect(screen.getByAltText("流程图")).toHaveAttribute(
       "src",
-      "/editorial/reward-hacking-gradient/process-grift-pipeline-1.svg",
+      "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/inline/process-grift-pipeline-1.png",
     );
   });
 

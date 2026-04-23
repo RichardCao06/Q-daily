@@ -48,4 +48,19 @@ describe("CollectionPage", () => {
 
     expect(screen.getByAltText("AVO 论文首页")).toBeInTheDocument();
   });
+  it("keeps Supabase storage urls unchanged for collection cards", () => {
+    const stories = [
+      {
+        ...getArticlesByTag("hao-wenzhang")[0]!,
+        heroImage: {
+          src: "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png",
+          alt: "Reward hacking 标题卡",
+        },
+      },
+    ];
+
+    render(<CollectionPage title="好文章" description="好文章标签页" stories={stories} />);
+
+    expect(screen.getByAltText("Reward hacking 标题卡")).toHaveAttribute("src", "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png");
+  });
 });

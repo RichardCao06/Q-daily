@@ -79,6 +79,27 @@ describe("HomePage", () => {
     expect(screen.getByAltText("何琼与张雪")).toBeInTheDocument();
   });
 
+  it("keeps Supabase storage urls unchanged on homepage cards", () => {
+    render(
+      <HomePage
+        data={{
+          ...homePageData,
+          spotlightStory: {
+            ...spotlightStory,
+            coverImage: {
+              src: "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png",
+              alt: "Reward hacking 标题卡",
+            },
+          },
+          sideFeatures,
+          featurePanels,
+          feedStories,
+        }}
+      />,
+    );
+
+    expect(screen.getByAltText("Reward hacking 标题卡")).toHaveAttribute("src", "https://trwasyzmcfcsjvcjndrm.supabase.co/storage/v1/object/public/article-media/articles/reward-hacking-gradient-feature-editorial/hero/cover-reward-hacking-title-card.png");
+  });
   it("renders an empty state when Supabase has not configured homepage modules yet", () => {
     render(
       <HomePage
