@@ -1,0 +1,70 @@
+name: Deploy to Tencent Cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tencent-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: pnpm build
+
+      - name: Assemble standalone bundle
+        run: |
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.TENCENT_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.TENCENT_SSH_PORT || '22' }} -H ${{ secrets.TENCENT_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Snapshot previous release on server
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.TENCENT_SSH_PORT || '22' }} \
+            ${{ secrets.TENCENT_SSH_USER }}@${{ secrets.TENCENT_SSH_HOST }} \
+            "if [ -d '${{ secrets.TENCENT_DEPLOY_PATH }}' ] && [ -n \"\$(ls -A '${{ secrets.TENCENT_DEPLOY_PATH }}' 2>/dev/null)\" ]; then \
+               rm -rf '${{ secrets.TENCENT_DEPLOY_PATH }}.bak' && \
+               cp -a '${{ secrets.TENCENT_DEPLOY_PATH }}' '${{ secrets.TENCENT_DEPLOY_PATH }}.bak'; \
+             fi"
+
+      - name: Rsync to server
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.TENCENT_SSH_PORT || '22' }}" \
+            .next/standalone/ \
+            ${{ secrets.TENCENT_SSH_USER }}@${{ secrets.TENCENT_SSH_HOST }}:${{ secrets.TENCENT_DEPLOY_PATH }}/
+
+      - name: Reload PM2
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.TENCENT_SSH_PORT || '22' }} \
+            ${{ secrets.TENCENT_SSH_USER }}@${{ secrets.TENCENT_SSH_HOST }} \
+            "cd ${{ secrets.TENCENT_DEPLOY_PATH }} && \
+             (pm2 reload qdaily --update-env || PORT=${{ secrets.TENCENT_APP_PORT || '3000' }} pm2 start server.js --name qdaily --update-env) && \
+             pm2 save"
