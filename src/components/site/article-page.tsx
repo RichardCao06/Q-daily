@@ -30,10 +30,10 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link className={styles.logo} href="/">
-            <span className={styles.logoMark}>Q</span>
+            <span className={styles.logoMark}>趣</span>
             <span className={styles.logoText}>
-              <strong>好奇心日报</strong>
-              <span>QDaily</span>
+              <strong>好有趣日报</strong>
+              <span>FunDaily</span>
             </span>
           </Link>
           <nav className={styles.nav} aria-label="文章页导航">

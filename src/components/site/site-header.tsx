@@ -13,11 +13,11 @@ export function SiteHeader({ currentLabel }: SiteHeaderProps) {
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <div className={styles.headerLeft}>
-          <Link className={styles.logo} href="/" aria-label="QDaily 首页">
-            <span className={styles.logoMark}>Q</span>
+          <Link className={styles.logo} href="/" aria-label="好有趣日报 首页">
+            <span className={styles.logoMark}>趣</span>
             <span className={styles.logoText}>
-              <strong>好奇心日报</strong>
-              <span>QDaily</span>
+              <strong>好有趣日报</strong>
+              <span>FunDaily</span>
             </span>
           </Link>
           <nav aria-label="主导航">

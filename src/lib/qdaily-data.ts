@@ -452,7 +452,7 @@ export const defaultHomePageCopy: HomePageCopy = {
     backToTopLabel: "回到顶部",
   },
   footerBrand: {
-    title: "好奇心日报",
+    title: "好有趣日报",
     text: "用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。",
   },
   footerSearch: {
