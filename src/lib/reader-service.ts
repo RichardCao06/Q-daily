@@ -95,6 +95,7 @@ export async function loadArticleEngagement(
     hasLiked: false,
     hasBookmarked: false,
   };
+  let viewerPendingComments: PublicComment[] = [];
 
   if (accessToken) {
     const {
@@ -102,9 +103,17 @@ export async function loadArticleEngagement(
     } = await supabase.auth.getUser(accessToken);
 
     if (user) {
-      const [likeResult, bookmarkResult] = await Promise.all([
+      const [likeResult, bookmarkResult, ownPendingResult, profileResult] = await Promise.all([
         db.from("article_likes").select("article_slug").eq("article_slug", articleSlug).eq("user_id", user.id).maybeSingle(),
         db.from("article_bookmarks").select("article_slug").eq("article_slug", articleSlug).eq("user_id", user.id).maybeSingle(),
+        db
+          .from("comments")
+          .select("id,content,created_at,status")
+          .eq("article_slug", articleSlug)
+          .eq("user_id", user.id)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false }),
+        db.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
       ]);
 
       viewer = {
@@ -112,6 +121,24 @@ export async function loadArticleEngagement(
         hasLiked: Boolean(likeResult.data),
         hasBookmarked: Boolean(bookmarkResult.data),
       };
+
+      const ownDisplayName =
+        (profileResult.data?.display_name as string | undefined) ??
+        user.email?.split("@")[0] ??
+        "Q-daily 读者";
+
+      viewerPendingComments = ((ownPendingResult.data ?? []) as Array<{
+        id: string;
+        content: string;
+        created_at: string;
+        status: "pending";
+      }>).map((row) => ({
+        id: row.id,
+        authorName: ownDisplayName,
+        content: row.content,
+        createdAt: row.created_at,
+        status: row.status,
+      }));
     }
   }
 
@@ -125,6 +152,7 @@ export async function loadArticleEngagement(
     authorName: comment.author_name,
     content: comment.content,
     createdAt: comment.created_at,
+    status: "approved",
   }));
 
   return {
@@ -134,6 +162,7 @@ export async function loadArticleEngagement(
       likeCount: engagementResult.data?.like_count ?? 0,
       bookmarkCount: engagementResult.data?.bookmark_count ?? 0,
       approvedComments: comments,
+      viewerPendingComments,
       viewer,
     }),
   };
