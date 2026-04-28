@@ -1,3 +1,4 @@
+import { COMMENT_MAX_LENGTH } from "@/lib/reader-data";
 import { ensureProfile, loadArticleEngagement, requireAuthenticatedSupabase } from "@/lib/reader-service";
 
 type RouteProps = {
@@ -16,7 +17,18 @@ export async function POST(request: Request, { params }: RouteProps) {
     if (!trimmedContent) {
       return Response.json(
         {
-          error: "Comment content is required",
+          error: "评论内容不能为空",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    if (trimmedContent.length > COMMENT_MAX_LENGTH) {
+      return Response.json(
+        {
+          error: `评论最多 ${COMMENT_MAX_LENGTH} 字`,
         },
         {
           status: 400,

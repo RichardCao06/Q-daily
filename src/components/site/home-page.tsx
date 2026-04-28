@@ -150,11 +150,11 @@ export function HomePage({ data }: HomePageProps) {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.headerLeft}>
-            <a className={styles.logo} href="#top" aria-label="QDaily 首页">
-              <span className={styles.logoMark}>Q</span>
+            <a className={styles.logo} href="#top" aria-label="好有趣日报 首页">
+              <span className={styles.logoMark}>趣</span>
               <span className={styles.logoText}>
-                <strong>好奇心日报</strong>
-                <span>QDaily</span>
+                <strong>好有趣日报</strong>
+                <span>FunDaily</span>
               </span>
             </a>
             <nav aria-label="主导航">
@@ -313,9 +313,9 @@ export function HomePage({ data }: HomePageProps) {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <span className={styles.footerBadge}>Q</span>
+            <span className={styles.footerBadge}>趣</span>
             <div>
-              <strong>{hasRenderableHomePage ? copy.footerBrand.title : "好奇心日报"}</strong>
+              <strong>{hasRenderableHomePage ? copy.footerBrand.title : "好有趣日报"}</strong>
               <p>{hasRenderableHomePage ? copy.footerBrand.text : "用更接近 2019 年原站的黄黑骨架，重新排一份可读的数字杂志。"}</p>
             </div>
           </div>

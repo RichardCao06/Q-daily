@@ -69,5 +69,28 @@ describe("reader data helpers", () => {
     expect(state.viewer.hasLiked).toBe(true);
     expect(state.viewer.hasBookmarked).toBe(false);
     expect(state.publicComments).toHaveLength(1);
+    expect(state.viewerPendingComments).toEqual([]);
+  });
+
+  it("preserves viewer's pending comments when supplied", () => {
+    const state = buildReaderEngagementState({
+      articleSlug: "rebuild-a-newsroom-wall",
+      likeCount: 0,
+      bookmarkCount: 0,
+      approvedComments: [],
+      viewerPendingComments: [
+        {
+          id: "pending-1",
+          authorName: "读者甲",
+          content: "等待审核",
+          createdAt: "2026-03-31T12:00:00.000Z",
+          status: "pending",
+        },
+      ],
+      viewer: { isLoggedIn: true },
+    });
+
+    expect(state.viewerPendingComments).toHaveLength(1);
+    expect(state.viewerPendingComments[0]).toMatchObject({ id: "pending-1", status: "pending" });
   });
 });

@@ -13,6 +13,7 @@ export type PublicComment = {
   authorName: string;
   content: string;
   createdAt: string;
+  status?: CommentStatus;
 };
 
 export type ReaderEngagementState = {
@@ -20,6 +21,7 @@ export type ReaderEngagementState = {
   likeCount: number;
   bookmarkCount: number;
   publicComments: PublicComment[];
+  viewerPendingComments: PublicComment[];
   viewer: {
     isLoggedIn: boolean;
     hasLiked: boolean;
@@ -44,6 +46,7 @@ type BuildReaderEngagementStateInput = {
   likeCount: number;
   bookmarkCount: number;
   approvedComments: PublicComment[];
+  viewerPendingComments?: PublicComment[];
   viewer?: {
     isLoggedIn?: boolean;
     hasLiked?: boolean;
@@ -57,6 +60,7 @@ export function buildReaderEngagementState(input: BuildReaderEngagementStateInpu
     likeCount: input.likeCount,
     bookmarkCount: input.bookmarkCount,
     publicComments: input.approvedComments,
+    viewerPendingComments: input.viewerPendingComments ?? [],
     viewer: {
       isLoggedIn: input.viewer?.isLoggedIn ?? false,
       hasLiked: input.viewer?.hasLiked ?? false,
@@ -64,3 +68,5 @@ export function buildReaderEngagementState(input: BuildReaderEngagementStateInpu
     },
   };
 }
+
+export const COMMENT_MAX_LENGTH = 500;
