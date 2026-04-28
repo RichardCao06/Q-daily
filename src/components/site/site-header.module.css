@@ -117,6 +117,23 @@
   white-space: nowrap;
 }
 
+.columnNavItem a {
+  font-weight: 600;
+  color: var(--ink-base, #1a1a1a);
+}
+
+.columnNavItem a[data-current="true"] {
+  color: var(--brand-yellow);
+}
+
+.navDivider {
+  width: 1px;
+  height: 14px;
+  background: var(--rule-soft, rgba(0, 0, 0, 0.18));
+  margin: 0 6px;
+  flex: 0 0 auto;
+}
+
 .headerRight {
   justify-content: flex-end;
   gap: 0;

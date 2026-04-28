@@ -8,12 +8,14 @@ import {
   footerColumns as fallbackFooterColumns,
   type HomePageCopy,
   primaryLinks,
+  siteColumns as fallbackSiteColumns,
   type Article,
   type ArticleLongformBlock,
   type FeaturePanel,
   type HomePageData,
   type SideFeature,
   type SiteCategory,
+  type SiteColumn,
   type SiteLink,
   type SiteTag,
   type SpotlightStory,
@@ -27,6 +29,7 @@ import { buildNormalizedSiteTags, mapStoredTagSlugsToEditor } from "./tag-taxono
 type SiteSnapshot = {
   articles: Article[];
   categories: SiteCategory[];
+  columns: SiteColumn[];
   tags: SiteTag[];
   spotlightStory: SpotlightStory | null;
   featurePanels: FeaturePanel[];
@@ -36,6 +39,7 @@ type SiteSnapshot = {
 
 export type SiteChromeData = {
   channelLinks: SiteLink[];
+  columnLinks: SiteLink[];
   primaryLinks: SiteLink[];
   utilityLinks: SiteLink[];
   footerColumns: SiteLink[][];
@@ -43,6 +47,7 @@ export type SiteChromeData = {
 
 type AuthorRow = Database["public"]["Tables"]["authors"]["Row"];
 type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
+type ColumnRow = Database["public"]["Tables"]["columns"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type ArticleBlockRow = Database["public"]["Tables"]["article_blocks"]["Row"];
 type ArticleTagRow = Database["public"]["Tables"]["article_tags"]["Row"];
@@ -87,11 +92,13 @@ function buildFeedStories(siteArticles: Article[]): Story[] {
   }));
 }
 
-export function buildSiteChromeData(categories: SiteCategory[], tags: SiteTag[]): SiteChromeData {
+export function buildSiteChromeData(categories: SiteCategory[], tags: SiteTag[], columns: SiteColumn[] = fallbackSiteColumns): SiteChromeData {
   const channelLinks = [...tags.map((item) => ({ label: item.name, href: item.href }))];
+  const columnLinks = columns.map((item) => ({ label: item.name, href: item.href }));
 
   return {
     channelLinks,
+    columnLinks,
     primaryLinks,
     utilityLinks,
     footerColumns: [
@@ -101,7 +108,10 @@ export function buildSiteChromeData(categories: SiteCategory[], tags: SiteTag[])
         { label: "好奇心研究所", href: "/labs" },
         { label: "栏目中心", href: "/special-columns" },
       ],
-      categories.map((item) => ({ label: item.name, href: item.href })),
+      [
+        ...columns.map((item) => ({ label: item.name, href: item.href })),
+        ...categories.map((item) => ({ label: item.name, href: item.href })),
+      ],
       fallbackFooterColumns[2] ?? [],
     ],
   };
@@ -315,13 +325,14 @@ function requireSupabaseServerClient() {
 const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
   const supabase = requireSupabaseServerClient();
 
-  const [authorsResult, categoriesResult, tagsResult, articlesResult, blocksResult, articleTagsResult, homepageModulesResult] = await Promise.all([
+  const [authorsResult, categoriesResult, columnsResult, tagsResult, articlesResult, blocksResult, articleTagsResult, homepageModulesResult] = await Promise.all([
     supabase.from("authors").select("slug,name"),
     supabase.from("categories").select("slug,name,description"),
+    supabase.from("columns").select("slug,name,description,sort_order").order("sort_order", { ascending: true }),
     supabase.from("tags").select("slug,name,description"),
     supabase
       .from("articles")
-      .select("slug,legacy_id,title,excerpt,published_at,comments_count,likes_count,palette,author_slug,reading_time,cover_alt,category_slug,status,hero_image_url,hero_image_caption")
+      .select("slug,legacy_id,title,excerpt,published_at,comments_count,likes_count,palette,author_slug,reading_time,cover_alt,category_slug,column_slug,status,hero_image_url,hero_image_caption")
       .eq("status", "published"),
     supabase.from("article_blocks").select("article_slug,position,kind,content").order("position", { ascending: true }),
     supabase.from("article_tags").select("article_slug,tag_slug"),
@@ -331,15 +342,22 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
       .order("sort_order", { ascending: true }),
   ]);
 
-  const results = [authorsResult, categoriesResult, tagsResult, articlesResult, blocksResult, articleTagsResult, homepageModulesResult];
+  const results = [authorsResult, categoriesResult, columnsResult, tagsResult, articlesResult, blocksResult, articleTagsResult, homepageModulesResult];
   const failedResult = results.find((result) => result.error);
 
   if (failedResult?.error) {
-    throw failedResult.error;
+    // The `columns` table is new — if the migration hasn't been applied yet
+    // we still want the rest of the site to render. Only throw when the
+    // failure is NOT just a missing-column-table error.
+    const isMissingColumnsTable = columnsResult.error === failedResult.error;
+    if (!isMissingColumnsTable) {
+      throw failedResult.error;
+    }
   }
 
   const authorRows = (authorsResult.data ?? []) as AuthorRow[];
   const categoryRows = (categoriesResult.data ?? []) as CategoryRow[];
+  const columnRows = (columnsResult.data ?? []) as ColumnRow[];
   const articleRows = (articlesResult.data ?? []) as ArticleRow[];
   const blockRows = (blocksResult.data ?? []) as ArticleBlockRow[];
   const articleTagRows = (articleTagsResult.data ?? []) as ArticleTagRow[];
@@ -350,10 +368,24 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
     name: category.name,
     href: `/categories/${category.slug}`,
   }));
+  // Prefer DB-provided columns; fall back to the seed when the migration hasn't been applied
+  // or the table is empty so the site doesn't crash mid-deploy.
+  const columns: SiteColumn[] = columnRows.length > 0
+    ? columnRows
+        .map((row) => ({
+          slug: row.slug,
+          name: row.name,
+          description: row.description,
+          href: `/columns/${row.slug}`,
+          sortOrder: row.sort_order,
+        }))
+        .sort((left, right) => left.sortOrder - right.sortOrder)
+    : [...fallbackSiteColumns];
   const tags = buildNormalizedSiteTags();
 
   const authorsBySlug = new Map(authorRows.map((author) => [author.slug, author.name]));
   const categoriesBySlug = new Map(categories.map((category) => [category.slug, category]));
+  const columnsBySlug = new Map(columns.map((column) => [column.slug, column]));
   const tagsBySlug = new Map<string, SiteTag>(tags.map((tag) => [tag.slug, tag]));
   const articleBlocksBySlug = new Map<string, ArticleLongformBlock[]>();
   const articleHeroImagesBySlug = new Map<string, NonNullable<Article["heroImage"]>>();
@@ -434,6 +466,8 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
             }
           : undefined;
 
+      const resolvedColumn = article.column_slug ? columnsBySlug.get(article.column_slug) : undefined;
+
       return [{
         id: article.legacy_id ?? article.slug,
         slug: article.slug,
@@ -448,6 +482,7 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
         coverAlt: article.cover_alt,
         body: normalizedBlocks.filter((block): block is Extract<ArticleLongformBlock, { type: "paragraph" }> => block.type === "paragraph").map((block) => block.content),
         category,
+        column: resolvedColumn,
         tags: resolvedTags,
         source: "supabase",
         heroImage: normalizedHeroImage,
@@ -458,6 +493,7 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
   return {
     articles: siteArticles,
     categories,
+    columns,
     tags,
     ...mapHomepageModules(homepageModuleRows),
   };
@@ -465,12 +501,12 @@ const loadSiteSnapshot = cache(async (): Promise<SiteSnapshot> => {
 
 export async function getSiteChromeData(): Promise<SiteChromeData> {
   const snapshot = await loadSiteSnapshot();
-  return buildSiteChromeData(snapshot.categories, snapshot.tags);
+  return buildSiteChromeData(snapshot.categories, snapshot.tags, snapshot.columns);
 }
 
 export async function getHomePageData(): Promise<HomePageData> {
   const snapshot = await loadSiteSnapshot();
-  const chrome = buildSiteChromeData(snapshot.categories, snapshot.tags);
+  const chrome = buildSiteChromeData(snapshot.categories, snapshot.tags, snapshot.columns);
   const feedStories = buildFeedStories(snapshot.articles);
   const hasConfiguredHomepage =
     Boolean(snapshot.spotlightStory) && snapshot.featurePanels.length >= 2 && snapshot.sideFeatures.length >= 2 && Boolean(snapshot.copy);
@@ -507,6 +543,16 @@ export async function getCategoryBySlugFromSource(slug: string) {
   return snapshot.categories.find((category) => category.slug === slug) ?? null;
 }
 
+export async function getColumnBySlugFromSource(slug: string) {
+  const snapshot = await loadSiteSnapshot();
+  return snapshot.columns.find((column) => column.slug === slug) ?? null;
+}
+
+export async function getAllSiteColumnsFromSource(): Promise<SiteColumn[]> {
+  const snapshot = await loadSiteSnapshot();
+  return snapshot.columns;
+}
+
 export async function getTagBySlugFromSource(slug: string) {
   const snapshot = await loadSiteSnapshot();
   return snapshot.tags.find((tag) => tag.slug === slug) ?? null;
@@ -522,6 +568,11 @@ export async function getAllCategorySlugsFromSource() {
   return snapshot.categories.map((category) => category.slug);
 }
 
+export async function getAllColumnSlugsFromSource() {
+  const snapshot = await loadSiteSnapshot();
+  return snapshot.columns.map((column) => column.slug);
+}
+
 export async function getAllTagSlugsFromSource() {
   const snapshot = await loadSiteSnapshot();
   return snapshot.tags.map((tag) => tag.slug);
@@ -530,6 +581,11 @@ export async function getAllTagSlugsFromSource() {
 export async function getArticlesByCategoryFromSource(categorySlug: string) {
   const articles = await getAllArticlesFromSource();
   return articles.filter((article) => article.category.slug === categorySlug);
+}
+
+export async function getArticlesByColumnFromSource(columnSlug: string) {
+  const articles = await getAllArticlesFromSource();
+  return articles.filter((article) => article.column?.slug === columnSlug);
 }
 
 export async function getArticlesByTagFromSource(tagSlug: string) {

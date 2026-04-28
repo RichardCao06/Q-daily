@@ -64,6 +64,7 @@ export type HomePageData = {
   feedStories: Story[];
   copy: HomePageCopy | null;
   channelLinks: SiteLink[];
+  columnLinks: SiteLink[];
   primaryLinks: SiteLink[];
   utilityLinks: SiteLink[];
   footerColumns: SiteLink[][];
@@ -128,6 +129,14 @@ export type SiteCategory = {
   href: string;
 };
 
+export type SiteColumn = {
+  slug: string;
+  name: string;
+  description: string | null;
+  href: string;
+  sortOrder: number;
+};
+
 export type SiteTag = {
   slug: string;
   name: string;
@@ -148,6 +157,7 @@ export type Article = {
   coverAlt: string;
   body: string[];
   category: SiteCategory;
+  column?: SiteColumn;
   tags: SiteTag[];
   layout?: "standard" | "longform";
   source?: "seed" | "supabase" | "markdown";
@@ -174,6 +184,11 @@ export type ArticleLongformBlock =
       src: string;
       alt: string;
       caption?: string;
+    }
+  | {
+      type: "list";
+      ordered: boolean;
+      items: string[];
     };
 
 const categorySeed = [
@@ -185,6 +200,52 @@ const categorySeed = [
   { slug: "culture", name: "文化" },
   { slug: "gaming", name: "游戏" },
 ] as const;
+
+const columnSeed: ReadonlyArray<{ slug: string; name: string; description: string; sortOrder: number }> = [
+  {
+    slug: "good-article",
+    name: "好文章",
+    description: "深度特稿、人物、复盘、组合——长读、需要叙事弧的报道",
+    sortOrder: 10,
+  },
+  {
+    slug: "good-take",
+    name: "好观点",
+    description: "评论、立场、解读——以判断和论证为核心的稿件",
+    sortOrder: 20,
+  },
+  {
+    slug: "good-grief",
+    name: "好家伙",
+    description: "产业级动作、大公司事件、震撼发布——节奏快、信号强、带惊讶感的新闻特写",
+    sortOrder: 30,
+  },
+  {
+    slug: "good-paper",
+    name: "好论文",
+    description: "研究、调研、技术机制解释——以论文/数据/机制为基础的解释类稿件",
+    sortOrder: 40,
+  },
+];
+
+export const siteColumns: SiteColumn[] = [...columnSeed]
+  .sort((left, right) => left.sortOrder - right.sortOrder)
+  .map((item) => ({
+    slug: item.slug,
+    name: item.name,
+    description: item.description,
+    href: `/columns/${item.slug}`,
+    sortOrder: item.sortOrder,
+  }));
+
+const columnMap = new Map(siteColumns.map((item) => [item.slug, item]));
+
+export function getSiteColumnBySlug(slug: string | null | undefined): SiteColumn | undefined {
+  if (!slug) {
+    return undefined;
+  }
+  return columnMap.get(slug);
+}
 
 const tagSeed = normalizedTagDefinitions.map(({ slug, name }) => ({ slug, name })) as ReadonlyArray<{
   slug: string;

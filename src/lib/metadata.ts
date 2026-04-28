@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import type { Article, SiteCategory, SiteTag } from "./qdaily-data";
+import type { Article, SiteCategory, SiteColumn, SiteTag } from "./qdaily-data";
 import { buildAbsoluteUrl, siteDescription, siteName } from "./site-config";
 
 export function buildHomeMetadata(): Metadata {
@@ -60,19 +60,23 @@ export function buildArticleMetadata(article: Article): Metadata {
   };
 }
 
-export function buildCollectionMetadata(collection: SiteCategory | SiteTag, kind: "category" | "tag"): Metadata {
-  const suffix = kind === "category" ? "栏目页" : "标签页";
+export function buildCollectionMetadata(
+  collection: SiteCategory | SiteTag | SiteColumn,
+  kind: "category" | "tag" | "column",
+): Metadata {
+  const suffix = kind === "category" ? "领域页" : kind === "column" ? "栏目页" : "标签页";
   const canonical = buildAbsoluteUrl(collection.href);
+  const description = (collection as SiteColumn).description ?? `浏览好有趣日报中与${collection.name}相关的${suffix}内容。`;
 
   return {
     title: `${collection.name}${suffix} | ${siteName}`,
-    description: `浏览 Q-daily 中与${collection.name}相关的${suffix}内容。`,
+    description,
     alternates: {
       canonical,
     },
     openGraph: {
       title: `${collection.name}${suffix} | ${siteName}`,
-      description: `浏览 Q-daily 中与${collection.name}相关的${suffix}内容。`,
+      description,
       url: canonical,
       siteName,
       locale: "zh_CN",

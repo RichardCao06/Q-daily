@@ -51,9 +51,27 @@ function parseCaption(line: string) {
   return captionMatch ? captionMatch[1]?.trim() ?? "" : null;
 }
 
+const BULLET_PREFIX_RE = /^[-*+]\s+(.+)$/;
+const ORDERED_PREFIX_RE = /^\d+\.\s+(.+)$/;
+
+function flushList(
+  listBuffer: { ordered: boolean; items: string[] } | null,
+  blocks: ArticleLongformBlock[],
+): null {
+  if (listBuffer && listBuffer.items.length > 0) {
+    blocks.push({
+      type: "list",
+      ordered: listBuffer.ordered,
+      items: [...listBuffer.items],
+    });
+  }
+  return null;
+}
+
 export function parseMarkdownBody(body: string) {
   const blocks: ArticleLongformBlock[] = [];
   const paragraphBuffer: string[] = [];
+  let listBuffer: { ordered: boolean; items: string[] } | null = null;
   const lines = body.split("\n");
 
   for (let index = 0; index < lines.length; index += 1) {
@@ -61,11 +79,13 @@ export function parseMarkdownBody(body: string) {
 
     if (!line) {
       flushParagraph(paragraphBuffer, blocks);
+      listBuffer = flushList(listBuffer, blocks);
       continue;
     }
 
     if (line.startsWith("## ")) {
       flushParagraph(paragraphBuffer, blocks);
+      listBuffer = flushList(listBuffer, blocks);
       blocks.push({
         type: "heading",
         level: 2,
@@ -76,6 +96,7 @@ export function parseMarkdownBody(body: string) {
 
     if (line.startsWith("### ")) {
       flushParagraph(paragraphBuffer, blocks);
+      listBuffer = flushList(listBuffer, blocks);
       blocks.push({
         type: "heading",
         level: 3,
@@ -87,6 +108,7 @@ export function parseMarkdownBody(body: string) {
     const imageMatch = line.match(/^!\[(.*)\]\((.*)\)$/);
     if (imageMatch) {
       flushParagraph(paragraphBuffer, blocks);
+      listBuffer = flushList(listBuffer, blocks);
 
       const [, alt, src] = imageMatch;
       let caption: string | undefined;
@@ -113,10 +135,34 @@ export function parseMarkdownBody(body: string) {
       continue;
     }
 
+    const bulletMatch = line.match(BULLET_PREFIX_RE);
+    if (bulletMatch) {
+      flushParagraph(paragraphBuffer, blocks);
+      if (!listBuffer || listBuffer.ordered) {
+        listBuffer = flushList(listBuffer, blocks);
+        listBuffer = { ordered: false, items: [] };
+      }
+      listBuffer.items.push(bulletMatch[1].trim());
+      continue;
+    }
+
+    const orderedMatch = line.match(ORDERED_PREFIX_RE);
+    if (orderedMatch) {
+      flushParagraph(paragraphBuffer, blocks);
+      if (!listBuffer || !listBuffer.ordered) {
+        listBuffer = flushList(listBuffer, blocks);
+        listBuffer = { ordered: true, items: [] };
+      }
+      listBuffer.items.push(orderedMatch[1].trim());
+      continue;
+    }
+
+    listBuffer = flushList(listBuffer, blocks);
     paragraphBuffer.push(line);
   }
 
   flushParagraph(paragraphBuffer, blocks);
+  flushList(listBuffer, blocks);
   return blocks;
 }
 

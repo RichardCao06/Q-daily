@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { renderInlineMarkdown } from "@/lib/inline-markdown";
 import { getRelatedArticles, type Article } from "@/lib/qdaily-data";
 
 import styles from "./longform-article.module.css";
@@ -40,7 +41,7 @@ export function LongformArticlePage({ article, relatedStories = getRelatedArticl
               if (block.type === "paragraph") {
                 return (
                   <p key={`${block.type}-${index}`} className={styles.paragraph}>
-                    {block.content}
+                    {renderInlineMarkdown(block.content, `p-${index}`)}
                   </p>
                 );
               }
@@ -51,6 +52,19 @@ export function LongformArticlePage({ article, relatedStories = getRelatedArticl
                   <HeadingTag key={`${block.type}-${index}`} className={styles.sectionHeading}>
                     {block.content}
                   </HeadingTag>
+                );
+              }
+
+              if (block.type === "list") {
+                const ListTag = block.ordered ? "ol" : "ul";
+                return (
+                  <ListTag key={`${block.type}-${index}`} className={styles.list}>
+                    {block.items.map((item, itemIndex) => (
+                      <li key={`item-${itemIndex}`}>
+                        {renderInlineMarkdown(item, `list-${index}-${itemIndex}`)}
+                      </li>
+                    ))}
+                  </ListTag>
                 );
               }
 

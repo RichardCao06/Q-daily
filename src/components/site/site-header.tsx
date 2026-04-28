@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { channelLinks, primaryLinks, utilityLinks } from "@/lib/qdaily-data";
+import { channelLinks, primaryLinks, siteColumns, utilityLinks } from "@/lib/qdaily-data";
 
 import styles from "./site-header.module.css";
 
@@ -35,6 +35,14 @@ export function SiteHeader({ currentLabel }: SiteHeaderProps) {
 
         <nav className={styles.headerCenter} aria-label="频道导航">
           <ul className={styles.categoryNav}>
+            {siteColumns.map((item) => (
+              <li key={`column-${item.slug}`} className={styles.columnNavItem}>
+                <Link href={item.href} data-current={item.name === currentLabel}>
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+            <li aria-hidden="true" className={styles.navDivider} />
             {channelLinks.map((item) => (
               <li key={item.label}>
                 <Link href={item.href} data-current={item.label === currentLabel}>

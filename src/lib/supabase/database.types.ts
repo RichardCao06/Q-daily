@@ -107,6 +107,7 @@ export type Database = {
         Row: {
           author_slug: string;
           category_slug: string;
+          column_slug: string | null;
           comments_count: number;
           cover_alt: string;
           created_at?: string;
@@ -128,6 +129,7 @@ export type Database = {
         Insert: {
           author_slug: string;
           category_slug: string;
+          column_slug?: string | null;
           comments_count?: number;
           cover_alt: string;
           excerpt: string;
@@ -147,6 +149,7 @@ export type Database = {
         Update: {
           author_slug?: string;
           category_slug?: string;
+          column_slug?: string | null;
           comments_count?: number;
           cover_alt?: string;
           excerpt?: string;
@@ -162,6 +165,28 @@ export type Database = {
           status?: "draft" | "published";
           title?: string;
           updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      columns: {
+        Row: {
+          created_at?: string;
+          description: string | null;
+          name: string;
+          slug: string;
+          sort_order: number;
+        };
+        Insert: {
+          description?: string | null;
+          name: string;
+          slug: string;
+          sort_order?: number;
+        };
+        Update: {
+          description?: string | null;
+          name?: string;
+          slug?: string;
+          sort_order?: number;
         };
         Relationships: [];
       };

@@ -583,6 +583,20 @@ function MarkdownImportPreview({ article }: { article: Article }) {
             );
           }
 
+          if (block.type === "list") {
+            const ListTag = block.ordered ? "ol" : "ul";
+            return (
+              <ListTag
+                key={`${block.type}-${index}`}
+                style={{ margin: 0, paddingLeft: "1.5em", display: "flex", flexDirection: "column", gap: "0.55em", lineHeight: 1.8 }}
+              >
+                {block.items.map((item, itemIndex) => (
+                  <li key={`item-${itemIndex}`}>{item}</li>
+                ))}
+              </ListTag>
+            );
+          }
+
           return (
             <figure key={`${block.type}-${index}`} style={{ margin: 0, display: "grid", gap: "8px" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}

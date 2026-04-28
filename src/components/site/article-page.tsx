@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
+import { renderInlineMarkdown } from "@/lib/inline-markdown";
 import { getRelatedArticles, type Article } from "@/lib/qdaily-data";
 
 import { ArticleEngagement } from "./article-engagement";
@@ -39,7 +40,9 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
           <nav className={styles.nav} aria-label="文章页导航">
             <Link href="/">首页</Link>
             <Link href={article.category.href}>{article.category.name}</Link>
-            <Link href="/tags/hao-wenzhang">好文章</Link>
+            {article.column ? (
+              <Link href={article.column.href}>{article.column.name}</Link>
+            ) : null}
             <Link href="/search">搜索</Link>
           </nav>
         </div>
@@ -51,6 +54,15 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
             <section className={styles.storyPaper}>
               <header className={styles.storyHeader}>
                 <div className={styles.storyTopMeta}>
+                  {article.column ? (
+                    <Link
+                      className={styles.storyColumn}
+                      href={article.column.href}
+                      aria-label={`栏目：${article.column.name}`}
+                    >
+                      {article.column.name}
+                    </Link>
+                  ) : null}
                   <Link className={styles.storyCategory} href={article.category.href}>
                     {article.category.name}
                   </Link>
@@ -96,7 +108,11 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
               <section className={styles.storyBody}>
                 {remainingStoryBlocks.map((block, index) => {
                   if (block.type === "paragraph") {
-                    return <p key={`${block.type}-${index}`}>{block.content}</p>;
+                    return (
+                      <p key={`${block.type}-${index}`}>
+                        {renderInlineMarkdown(block.content, `p-${index}`)}
+                      </p>
+                    );
                   }
 
                   if (block.type === "heading") {
@@ -106,6 +122,20 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
                       <HeadingTag key={`${block.type}-${index}`} className={styles.storySectionHeading}>
                         {block.content}
                       </HeadingTag>
+                    );
+                  }
+
+                  if (block.type === "list") {
+                    const ListTag = block.ordered ? "ol" : "ul";
+
+                    return (
+                      <ListTag key={`${block.type}-${index}`} className={styles.storyList}>
+                        {block.items.map((item, itemIndex) => (
+                          <li key={`item-${itemIndex}`}>
+                            {renderInlineMarkdown(item, `list-${index}-${itemIndex}`)}
+                          </li>
+                        ))}
+                      </ListTag>
                     );
                   }
 

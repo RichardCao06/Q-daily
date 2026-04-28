@@ -3,14 +3,16 @@ import type { MetadataRoute } from "next";
 import {
   getAllArticlesFromSource,
   getAllCategorySlugsFromSource,
+  getAllColumnSlugsFromSource,
   getAllTagSlugsFromSource,
 } from "@/lib/content-source";
 import { buildAbsoluteUrl } from "@/lib/site-config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [articles, categorySlugs, tagSlugs] = await Promise.all([
+  const [articles, categorySlugs, columnSlugs, tagSlugs] = await Promise.all([
     getAllArticlesFromSource(),
     getAllCategorySlugsFromSource(),
+    getAllColumnSlugsFromSource(),
     getAllTagSlugsFromSource(),
   ]);
 
@@ -50,11 +52,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const columnEntries: MetadataRoute.Sitemap = columnSlugs.map((slug) => ({
+    url: buildAbsoluteUrl(`/columns/${slug}`),
+    changeFrequency: "daily",
+    priority: 0.85,
+  }));
+
   const tagEntries: MetadataRoute.Sitemap = tagSlugs.map((slug) => ({
     url: buildAbsoluteUrl(`/tags/${slug}`),
     changeFrequency: "daily",
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...articleEntries, ...categoryEntries, ...tagEntries];
+  return [...staticEntries, ...articleEntries, ...columnEntries, ...categoryEntries, ...tagEntries];
 }

@@ -81,6 +81,16 @@ export function serializeArticleBlock(block: ArticleLongformBlock): StoredArticl
     };
   }
 
+  if (block.type === "list") {
+    return {
+      kind: "list",
+      content: JSON.stringify({
+        ordered: block.ordered,
+        items: block.items,
+      }),
+    };
+  }
+
   return {
     kind: "image",
     content: JSON.stringify({
@@ -163,6 +173,26 @@ export function deserializeStoredArticleBlock(block: StoredArticleBlock): Articl
         src: parsed.src,
         alt: parsed.alt,
         caption: typeof parsed.caption === "string" ? parsed.caption : undefined,
+      };
+    }
+
+    return null;
+  }
+
+  if (block.kind === "list") {
+    let parsed: { ordered?: boolean; items?: unknown };
+
+    try {
+      parsed = JSON.parse(block.content) as { ordered?: boolean; items?: unknown };
+    } catch {
+      return null;
+    }
+
+    if (Array.isArray(parsed.items) && parsed.items.every((item) => typeof item === "string")) {
+      return {
+        type: "list",
+        ordered: Boolean(parsed.ordered),
+        items: parsed.items as string[],
       };
     }
 

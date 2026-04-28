@@ -143,6 +143,14 @@ function serializeBlocksToMarkdown(
       continue;
     }
 
+    if (decoded.type === "list") {
+      const lines = decoded.items.map((item, idx) =>
+        decoded.ordered ? `${idx + 1}. ${item}` : `- ${item}`,
+      );
+      sections.push(lines.join("\n"));
+      continue;
+    }
+
     sections.push(`![${decoded.alt}](${decoded.src})`);
     if (decoded.caption) {
       sections.push(`*${decoded.caption}*`);
@@ -516,6 +524,17 @@ export async function createAdminArticle(input: ArticleMutationInput, accessToke
         };
       }
 
+      if (block.type === "list") {
+        return {
+          position: index + 1,
+          kind: "list",
+          content: JSON.stringify({
+            ordered: block.ordered,
+            items: block.items,
+          }),
+        };
+      }
+
       return {
         position: index + 1,
         kind: "image",
@@ -691,6 +710,17 @@ export async function updateAdminArticle(slug: string, input: ArticleMutationInp
           content: JSON.stringify({
             level: block.level,
             content: block.content,
+          }),
+        };
+      }
+
+      if (block.type === "list") {
+        return {
+          position: index + 1,
+          kind: "list",
+          content: JSON.stringify({
+            ordered: block.ordered,
+            items: block.items,
           }),
         };
       }
