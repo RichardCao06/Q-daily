@@ -263,7 +263,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.92fr) minmax(280px, 0.88fr);
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .heroMasthead {
@@ -282,6 +282,7 @@
 
 .heroRail {
   display: grid;
+  grid-template-rows: 1fr 1fr;
   gap: 18px;
   min-width: 0;
 }
@@ -301,9 +302,9 @@
 .heroFeatureLarge,
 .heroFeatureSmall,
 .heroLogin,
-.heroLatest,
-.heroDownload {
+.heroCalendar {
   height: 100%;
+  min-height: 0;
 }
 
 .leadCard {
@@ -314,8 +315,7 @@
   min-height: 326px;
 }
 
-.featureSmallCard,
-.downloadCard {
+.featureSmallCard {
   min-height: 326px;
 }
 
@@ -323,13 +323,13 @@
   min-height: 380px;
 }
 
-.latestModule {
-  min-height: 220px;
+.calendarCard {
+  min-height: 380px;
 }
 
 .visualCard,
 .loginModule,
-.latestModule {
+.calendarCard {
   height: 100%;
   border: 1px solid var(--line-soft);
   border-radius: 24px;
@@ -549,70 +549,94 @@
   font-size: 0.84rem;
 }
 
-.latestLink {
-  display: block;
-  height: 100%;
-}
-
-.latestModule {
+.calendarCard {
+  position: relative;
   display: grid;
   align-content: space-between;
-  gap: 10px;
+  gap: 18px;
   padding: 24px;
-  background: #fff;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgb(192 153 36 / 0.06) 0%, transparent 60%),
+    #fff;
 }
 
-.latestHeader {
+.calendarCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 28px;
+  width: 1px;
+  height: 18px;
+  background: var(--brand-yellow);
+  opacity: 0.55;
+}
+
+.calendarCard::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 64px;
+  width: 1px;
+  height: 18px;
+  background: var(--brand-yellow);
+  opacity: 0.55;
+}
+
+.calendarDate {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--brand-yellow);
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.latestDigits {
+  align-items: baseline;
+  gap: 14px;
   font-family: var(--font-display);
-  margin: 0;
-  font-size: clamp(2.2rem, 2.8vw, 2.95rem);
-  line-height: 0.98;
+  color: var(--ink-strong);
+}
+
+.calendarDay {
+  font-size: clamp(4.4rem, 7.5vw, 6rem);
+  font-weight: 600;
+  line-height: 0.92;
   letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendarMonth {
+  font-size: 1.45rem;
+  letter-spacing: 0.02em;
   color: var(--ink-strong);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  overflow: hidden;
-  text-wrap: balance;
+  opacity: 0.78;
 }
 
-.latestCopy {
-  color: var(--ink-muted);
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.latestFooter {
+.calendarMeta {
   display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
   width: fit-content;
-  padding: 8px 12px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(192 153 36 / 0.1);
   color: var(--ink-strong);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
-.downloadCard .visualCategory {
-  top: 24px;
-  left: 24px;
+.calendarYear {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
-.downloadCard .visualBody,
-.downloadCard .visualMeta {
-  padding-right: 24px;
-  padding-left: 24px;
+.calendarDot {
+  opacity: 0.45;
+}
+
+.calendarWeekday {
+  color: var(--brand-yellow);
+  font-weight: 600;
+}
+
+.calendarHint {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+  line-height: 1.7;
 }
 
 .feedSection {
@@ -866,12 +890,12 @@
   }
 
   .featureLargeCard,
-  .featureSmallCard,
-  .downloadCard {
+  .featureSmallCard {
     min-height: 308px;
   }
 
-  .loginModule {
+  .loginModule,
+  .calendarCard {
     min-height: 344px;
   }
 
@@ -912,10 +936,13 @@
   .leadCard,
   .featureLargeCard,
   .featureSmallCard,
-  .downloadCard,
   .loginModule,
-  .latestModule {
+  .calendarCard {
     min-height: unset;
+  }
+
+  .heroRail {
+    grid-template-rows: auto auto;
   }
 
   .sectionHeading,

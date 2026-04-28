@@ -32,13 +32,14 @@ describe("HomePage", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("登录 / 注册").length).toBeGreaterThan(0);
-    expect(screen.getByText("最新")).toBeInTheDocument();
+    expect(screen.getByText("今日 · TODAY")).toBeInTheDocument();
+    expect(screen.getByLabelText("今日")).toBeInTheDocument();
     expect(screen.getByText("加载更多")).toBeInTheDocument();
     expect(screen.getByRole("searchbox", { name: "搜索文章" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "编辑挑选的首页文章流" })).toBeInTheDocument();
     expect(screen.getByText("不再强调压迫式信息墙，而让每一条内容都像被认真摆放过的展签。")).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(
-      feedStories.length + sideFeatures.length + featurePanels.length + 1,
+      feedStories.length + featurePanels.length + 1,
     );
     expect(screen.getAllByRole("contentinfo").at(-1)).toHaveTextContent("下载 APP");
     const banner = screen.getByRole("banner");
@@ -200,7 +201,6 @@ describe("HomePage", () => {
     expect(screen.getByText("进入账户")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "立即登录" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "创建账户" })).toBeInTheDocument();
-    expect(screen.getByText("刚刚更新")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "数据库驱动的首页文章流" })).toBeInTheDocument();
     expect(screen.getByText("继续展开")).toBeInTheDocument();
     expect(screen.getByText("返回顶部")).toBeInTheDocument();
@@ -209,42 +209,24 @@ describe("HomePage", () => {
     expect(screen.getByText("2026 Supabase-driven QDaily")).toBeInTheDocument();
   });
 
-  it("renders the latest module timestamp from the latest Supabase-fed story", () => {
-    render(
-      <HomePage
-        data={{
-          ...homePageData,
-          copy: {
-            ...defaultHomePageCopy,
-            latestMeta: {
-              statusLabel: "刚刚更新",
-              updatedAtPrefix: "同步于",
-            },
-          },
-          feedStories: [
-            {
-              ...feedStories[0]!,
-              id: "story-latest",
-              publishedAt: "2026-04-18 09:15",
-            },
-            ...feedStories.slice(1),
-          ],
-        }}
-      />,
-    );
+  it("renders today's date as the right-rail calendar card with day, month, year and weekday", () => {
+    const fixedToday = new Date("2026-04-27T08:00:00.000Z");
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedToday);
 
-    expect(screen.getByText("同步于 04 / 18")).toBeInTheDocument();
-    expect(screen.queryByText("更新于 03 / 30")).not.toBeInTheDocument();
-  });
+    try {
+      render(<HomePage data={homePageData} />);
 
-  it("renders the latest module story title as a heading for constrained editorial typography", () => {
-    render(<HomePage data={homePageData} />);
-
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: sideFeatures[0]!.title,
-      }),
-    ).toBeInTheDocument();
+      const calendar = screen.getByLabelText("今日");
+      expect(within(calendar).getByText("今日 · TODAY")).toBeInTheDocument();
+      expect(within(calendar).getByText(String(fixedToday.getDate()))).toBeInTheDocument();
+      expect(within(calendar).getByText(`${fixedToday.getMonth() + 1} 月`)).toBeInTheDocument();
+      expect(within(calendar).getByText(String(fixedToday.getFullYear()))).toBeInTheDocument();
+      // Local weekday label depends on the test environment's TZ — assert one of the seven labels appears.
+      const weekdayLabels = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      expect(weekdayLabels.some((label) => within(calendar).queryByText(label) !== null)).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -73,46 +73,31 @@ function VisualCard({
   );
 }
 
-function formatLatestPublishedAt(publishedAt?: string) {
-  if (!publishedAt) {
-    return null;
-  }
+const WEEKDAY_LABELS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] as const;
 
-  const match = publishedAt.match(/^\d{4}-(\d{2})-(\d{2})/);
-  if (!match) {
-    return publishedAt;
-  }
-
-  return `${match[1]} / ${match[2]}`;
-}
-
-function LatestModule({
-  latestStory,
-  meta,
-  latestPublishedAt,
-}: {
-  latestStory: HomePageData["sideFeatures"][0];
-  meta: HomePageCopy["latestMeta"];
-  latestPublishedAt?: string;
-}) {
-  const formattedLatestPublishedAt = formatLatestPublishedAt(latestPublishedAt);
+function CalendarCard({ today }: { today: Date }) {
+  const day = today.getDate();
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
+  const weekday = WEEKDAY_LABELS[today.getDay()];
+  const isoDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   return (
-    <a className={styles.latestLink} href={latestStory.href}>
-      <article className={styles.latestModule}>
-        <div className={styles.latestHeader}>
-          <span>{latestStory.category}</span>
-          <span>{meta.statusLabel}</span>
-        </div>
-        <h2 className={styles.latestDigits}>{latestStory.title}</h2>
-        <p className={styles.latestCopy}>{latestStory.excerpt}</p>
-        {formattedLatestPublishedAt ? (
-          <div className={styles.latestFooter}>
-            {meta.updatedAtPrefix} {formattedLatestPublishedAt}
-          </div>
-        ) : null}
-      </article>
-    </a>
+    <section className={styles.calendarCard} aria-label="今日">
+      <p className={styles.moduleEyebrow}>今日 · TODAY</p>
+      <time className={styles.calendarDate} dateTime={isoDate}>
+        <span className={styles.calendarDay}>{day}</span>
+        <span className={styles.calendarMonth}>{month} 月</span>
+      </time>
+      <div className={styles.calendarMeta}>
+        <span className={styles.calendarYear}>{year}</span>
+        <span className={styles.calendarDot} aria-hidden="true">
+          ·
+        </span>
+        <span className={styles.calendarWeekday}>{weekday}</span>
+      </div>
+      <p className={styles.calendarHint}>翻开今日的好有趣日报，慢慢看。</p>
+    </section>
   );
 }
 
@@ -237,32 +222,13 @@ export function HomePage({ data }: HomePageProps) {
               </div>
 
               <div className={styles.heroRail}>
-                {data.sideFeatures[0] ? (
-                  <div className={`${styles.heroSlot} ${styles.heroLatest}`.trim()}>
-                    <LatestModule
-                      latestStory={data.sideFeatures[0]}
-                      meta={copy.latestMeta}
-                      latestPublishedAt={data.feedStories[0]?.publishedAt}
-                    />
-                  </div>
-                ) : null}
+                <div className={`${styles.heroSlot} ${styles.heroCalendar}`.trim()}>
+                  <CalendarCard today={new Date()} />
+                </div>
 
                 <div className={`${styles.heroSlot} ${styles.heroLogin}`.trim()}>
                   <LoginModule moduleCopy={copy.loginModule} actionCopy={copy.loginActions} />
                 </div>
-
-                {data.sideFeatures[1] ? (
-                  <a href={data.sideFeatures[1].href} className={`${styles.heroSlot} ${styles.heroDownload}`.trim()}>
-                    <VisualCard
-                      category={data.sideFeatures[1].category}
-                      title={data.sideFeatures[1].title}
-                      excerpt={data.sideFeatures[1].excerpt}
-                      palette={data.sideFeatures[1].palette}
-                      className={styles.downloadCard}
-                      accent="light"
-                    />
-                  </a>
-                ) : null}
               </div>
             </section>
 
