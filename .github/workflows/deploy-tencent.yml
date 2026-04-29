@@ -68,3 +68,19 @@ jobs:
             "cd ${{ secrets.TENCENT_DEPLOY_PATH }} && \
              (pm2 reload qdaily --update-env || PORT=${{ secrets.TENCENT_APP_PORT || '3000' }} pm2 start server.js --name qdaily --update-env) && \
              pm2 save"
+
+      # Post-deploy acceptance test. Curls the live origin and asserts the
+      # rendered HTML contains the editorial layout markers (block kinds,
+      # column badge, inline markdown). If anything is missing, this step
+      # exits non-zero and the deploy turns red even though PM2 reloaded ok —
+      # which is exactly what we want when a silent rendering regression
+      # ships (e.g. list blocks collapsing into one paragraph, **bold**
+      # showing as literal asterisks). See scripts/acceptance-test.sh.
+      - name: Post-deploy acceptance test
+        env:
+          BASE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: |
+          # Give the freshly-reloaded PM2 a couple of seconds to warm up the
+          # Next.js server before we start curling it.
+          sleep 5
+          bash scripts/acceptance-test.sh "${BASE_URL:-https://www.pigppy.site}"
