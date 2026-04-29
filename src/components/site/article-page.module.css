@@ -489,6 +489,8 @@
 }
 
 .relatedCard {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line-soft);
   border-radius: 24px;
   background: #fff;
@@ -496,22 +498,20 @@
   box-shadow: var(--shadow-soft);
 }
 
-.relatedWide {
-  grid-column: span 2;
+.relatedCard > a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .relatedVisual {
   position: relative;
-  min-height: 184px;
+  aspect-ratio: 16 / 11;
   background:
     radial-gradient(circle at top right, rgb(255 255 255 / 0.4), transparent 28%),
     linear-gradient(140deg, rgb(255 255 255 / 0.18), rgb(255 255 255 / 0.04)),
     var(--card-gradient);
   overflow: hidden;
-}
-
-.relatedWide .relatedVisual {
-  min-height: 226px;
 }
 
 .relatedCover {
@@ -522,6 +522,10 @@
 }
 
 .relatedBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   padding: 18px;
 }
 
@@ -533,9 +537,14 @@
 }
 
 .relatedBody h3 {
-  margin-top: 10px;
+  margin: 0;
   font-size: 1.04rem;
   line-height: 1.48;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-wrap: balance;
 }
 
 @media (max-width: 1120px) {
@@ -574,8 +583,7 @@
   }
 
   .mainColumn,
-  .sidebar,
-  .relatedWide {
+  .sidebar {
     grid-column: span 1;
   }
 

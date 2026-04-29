@@ -169,13 +169,13 @@ export function ArticlePage({ article, relatedStories = getRelatedArticles(artic
         <section className={styles.relatedSection}>
           <h2 className={styles.sectionHeading}>相关阅读</h2>
           <div className={styles.relatedGrid}>
-            {relatedStories.map((story, index) => {
+            {relatedStories.map((story) => {
               const cardStyle = {
                 "--card-gradient": story.palette,
               } as CSSProperties;
 
               return (
-                <article key={story.slug} className={`${styles.relatedCard} ${index === 0 ? styles.relatedWide : ""}`.trim()}>
+                <article key={story.slug} className={styles.relatedCard}>
                   <Link href={`/articles/${story.slug}`}>
                     <div className={styles.relatedVisual} style={cardStyle}>
                       {story.heroImage ? (
