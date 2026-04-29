@@ -113,10 +113,10 @@ export function LoginPanel() {
           注册
         </button>
       </div>
-      <h1 className={styles.title}>{mode === "login" ? "邮箱密码登录" : "注册 Q-daily 账户"}</h1>
+      <h1 className={styles.title}>{mode === "login" ? "邮箱密码登录" : "注册好有趣日报账户"}</h1>
       <p className={styles.description}>
         {mode === "login"
-          ? "使用邮箱和密码登录 Q-daily 账户，登录后即可进入个人中心和后台。"
+          ? "使用邮箱和密码登录好有趣日报账户，登录后即可进入个人中心和后台。"
           : "用邮箱和密码创建账户。若 Supabase 开启邮箱确认，注册后请先完成确认再登录。"}
       </p>
 
