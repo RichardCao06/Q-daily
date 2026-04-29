@@ -59,7 +59,7 @@ describe("LoginPanel", () => {
     expect(screen.getByLabelText("邮箱地址")).toBeInTheDocument();
     expect(screen.getByLabelText("密码")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "登录" })).toBeInTheDocument();
-    expect(screen.getByText("使用邮箱和密码登录 Q-daily 账户，登录后即可进入个人中心和后台。")).toBeInTheDocument();
+    expect(screen.getByText("使用邮箱和密码登录好有趣日报账户，登录后即可进入个人中心和后台。")).toBeInTheDocument();
   });
 
   it("updates the email field as the reader types", () => {
@@ -124,7 +124,7 @@ describe("LoginPanel", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: "注册" }));
 
-    expect(screen.getByRole("heading", { level: 1, name: "注册 Q-daily 账户" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "注册好有趣日报账户" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "创建账户" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("邮箱地址"), {

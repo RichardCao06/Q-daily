@@ -77,6 +77,17 @@
   border: 1px solid var(--line-soft);
   border-radius: 14px;
   font: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field input:hover:not(:disabled, :focus) {
+  border-color: var(--line-strong);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--brand-yellow);
+  box-shadow: 0 0 0 4px rgb(111 137 121 / 0.14);
 }
 
 .form button {
@@ -90,6 +101,15 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+
+.form button:hover:not(:disabled) {
+  background: #5d7567;
+}
+
+.form button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .form button:disabled {

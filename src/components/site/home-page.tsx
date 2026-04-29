@@ -175,7 +175,7 @@ export function HomePage({ data }: HomePageProps) {
       <main className={styles.main}>
         {!hasRenderableHomePage ? (
           <section className={styles.emptyState} aria-label="首页空状态">
-            <span className={styles.emptyEyebrow}>Supabase Homepage</span>
+            <span className={styles.emptyEyebrow}>好有趣日报 · 待配置</span>
             <h1>首页内容暂未配置</h1>
             <p>请先在 Supabase 中发布文章并配置首页模块，首页才会显示正式内容。</p>
           </section>
