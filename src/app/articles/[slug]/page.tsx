@@ -5,6 +5,12 @@ import { ArticlePage } from "@/components/site/article-page";
 import { getAllArticleSlugsFromSource, getArticleBySlugFromSource, getRelatedArticlesFromSource } from "@/lib/content-source";
 import { buildArticleMetadata } from "@/lib/metadata";
 
+// ISR: regenerate the page in the background at most once every 60 seconds
+// after a request comes in. This is what keeps newly-published / edited
+// articles in sync with the DB without paying the cost of full dynamic
+// rendering on every request.
+export const revalidate = 60;
+
 type ArticleRouteProps = {
   params: Promise<{
     slug: string;
